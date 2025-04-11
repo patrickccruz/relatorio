@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Gerador de Script</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Meta tags de segurança -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://nominatim.openstreetmap.org https://discord.com https://api.whatsapp.com; img-src 'self' https://raw.githubusercontent.com data:;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="no-referrer-when-downgrade">
+
+  <!-- Favicons -->
+  <link href="assets/img/Icon geral.png" rel="icon">
+  <link href="assets/img/Icon geral.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    :focus {
+      border-color: #1bd81b !important; /* Use !important para sobrescrever */
+      box-shadow: 0 0 5px rgb(7, 228, 25) !important;
+      outline: none !important;
+    }
+    
+    .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid rgba(0,0,0,.125);
+      padding: 0.75rem 1.25rem;
+    }
+    
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+    
+    .float-alert {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+    
+    .copy-btn {
+      cursor: pointer;
+    }
+    
+    .readonly-info {
+      background-color: #f8f9fa;
+    }
+
+    .pac-container {
+      z-index: 1060 !important;
+    }
+
+    .btn-action {
+      font-weight: 600;
+      padding: 10px 20px;
+      transition: all 0.3s;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Estilos para autocomplete Nominatim */
+    .sugestoes-endereco {
+      position: absolute;
+      background: white;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      border: 1px solid #ced4da;
+      border-radius: 0 0 0.25rem 0.25rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .sugestao-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f1f1;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sugestao-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .form-floating {
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="assets/img/Icon geral.png" alt="">
+        <span class="d-none d-lg-block">Script</span>
+      </a>
+      <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+    
+    <!-- Barra de progresso -->
+    <div class="ms-auto me-3 d-none d-md-block" style="width: 30%;">
+      <div class="progress" style="height: 10px;">
+        <div class="progress-bar bg-success" id="formProgress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </div>
+  </header><!-- End Header -->
+
+
+  <!-- ======= Sidebar ======= -->
+  <aside id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+      <li class="nav-item">
+        <a class="nav-link " href="index.html">
+          <i class="bi bi-grid"></i>
+          <span>Gerador Script</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+    </ul>
+  </aside><!-- End Sidebar-->
+
+  <main id="main" class="main">
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+          <!-- Progress bar móvel -->
+          <div class="d-md-none mb-3">
+            <div class="progress" style="height: 10px;">
+              <div class="progress-bar bg-success" id="formProgressMobile" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="text-center mt-1">
+              <small id="progressText">0% Preenchido</small>
+            </div>
+          </div>
+          
+          <form id="scriptForm">
+            <!-- Card 1: Informações Básicas -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h5><i class="bi bi-info-circle me-2"></i>Informações Básicas</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                      <input type="date" class="form-control" id="dataChamado" oninput="infoGeral()">
+                      <label for="dataChamado">Data do chamado:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                      <input type="number" class="form-control" id="numeroChamado" oninput="infoGeral()">
+                      <label for="numeroChamado">Nº do chamado:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                      <select class="form-select" id="tipoChamado" oninput="infoGeral()">
+                        <option value="">Selecione o tipo</option>
+                        <option value="implantação">Implantação</option>
+                        <option value="sustentação">Sustentação</option>
+                      </select>
+                      <label for="tipoChamado">Tipo de chamado:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="cliente" oninput="infoGeral()">
+                      <label for="cliente">Cliente:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="nomeInformante" oninput="infoGeral()">
+                      <label for="nomeInformante">Nome de quem informou o chamado:</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Detalhes do Serviço -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h5><i class="bi bi-tools me-2"></i>Detalhes do Serviço</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="number" class="form-control" id="quantidadePatrimonios" oninput="infoGeral()">
+                      <label for="quantidadePatrimonios">Quantidade de patrimônios tratados:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <select class="form-select" id="statusChamado" oninput="infoGeral()">
+                        <option value="">Selecione o status</option>
+                        <option value="resolvido">Resolvido</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="improdutivo">Improdutivo</option>
+                      </select>
+                      <label for="statusChamado">Status do chamado:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-floating mb-3">
+                  <textarea class="form-control" id="descricaoChamado" style="height: 120px" oninput="infoGeral()"></textarea>
+                  <label for="descricaoChamado">Breve descrição do chamado:</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Deslocamento -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h5><i class="bi bi-truck me-2"></i>Deslocamento</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="number" class="form-control" id="kmInicial" oninput="calcularKmTotal(); infoGeral()">
+                      <label for="kmInicial">KM inicial:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="number" class="form-control" id="kmFinal" oninput="calcularKmTotal(); infoGeral()">
+                      <label for="kmFinal">KM final:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-floating mb-3">
+                  <input type="text" class="form-control readonly-info" id="kmTotal" readonly>
+                  <label for="kmTotal">KM total percorrido:</label>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="enderecoPartida" placeholder="Digite o endereço de partida" oninput="infoGeral()">
+                      <label for="enderecoPartida">Endereço de partida:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="enderecoChegada" placeholder="Digite o endereço de chegada" oninput="infoGeral()">
+                      <label for="enderecoChegada">Endereço de chegada:</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Tempo de Atendimento -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h5><i class="bi bi-clock-history me-2"></i>Tempo de Atendimento</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="time" class="form-control" id="horaChegada" oninput="calcularTempoAtendimento(); infoGeral()">
+                      <label for="horaChegada">Horário de chegada:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="time" class="form-control" id="horaSaida" oninput="calcularTempoAtendimento(); infoGeral()">
+                      <label for="horaSaida">Horário de saída:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-floating mb-3">
+                  <input type="text" class="form-control readonly-info" id="tempoTotal" readonly>
+                  <label for="tempoTotal">Tempo total de atendimento:</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="text-center mb-4">
+              <button type="button" class="btn btn-primary btn-lg btn-action" onclick="enviarRelatorioCombinado()">
+                <i class="bi bi-send-check-fill me-2"></i> Enviar e Copiar Relatório
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-action ms-3" onclick="deleteRespGeral()">
+                <i class="bi bi-trash"></i> Apagar Tudo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Patrick C Cruz</span></strong>. Todos os direitos Reservado
+    </div>
+    <div class="credits">
+      Feito pelo <a href="https://www.linkedin.com/in/patrick-da-costa-cruz-08493212a/" target="_blank">Patrick C
+        Cruz</a>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="script.js"></script>
+  <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <!-- Modais de Notificação -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-check-circle"></i> Sucesso
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="successModalBody">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-circle"></i> Erro
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="errorModalBody">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast para feedback instantâneo -->
+  <div class="toast-container float-alert">
+    <div id="toastAlert" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <span id="toastMessage">Relatório copiado para a área de transferência!</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
