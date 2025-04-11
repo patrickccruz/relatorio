@@ -28,7 +28,7 @@ function getWebhookUrl() {
   // Se não estiver configurado, use a URL padrão (somente desenvolvimento)
   if (!webhookUrl && process.env.NODE_ENV !== 'production') {
     // URL padrão para desenvolvimento - NÃO USE EM PRODUÇÃO
-    return 'https://discord.com/api/webhooks/1338854980920279071/rXnr0N7Byj1pY_7_T7UcKyM6Oc7QeAPiDDZVkBtGHt3zooXaX0b2SyROlpExvaJFoJSi';
+    return 'https://discord.com/api/webhooks/1360296356144480266/FoS8X0j3cRQVknl5qJoxiFr4e6OojnQ7XhyscYwDAZFufyx1UYb7t216LKkR8ocpWaZm';
   }
   
   return webhookUrl;
