@@ -50,7 +50,14 @@ async function sendToDiscord(content) {
       numeroChamado: document.getElementById("numeroChamado").value || 'Não informado',
       tipoChamado: document.getElementById("tipoChamado").value || 'Não informado',
       cliente: document.getElementById("cliente").value || 'Não informado',
+      parceiro: document.getElementById("parceiro").value || 'Não informado',
+      nomeTecnico: document.getElementById("nomeTecnico").value || 'Não informado',
+      telefoneTecnico: document.getElementById("telefoneTecnico").value || 'Não informado',
       quantidadePatrimonios: document.getElementById("quantidadePatrimonios").value || 'Não informado',
+      problemaIdentificado: document.getElementById("problemaIdentificado").value || 'Não informado',
+      numeroPatrimonio: document.getElementById("numeroPatrimonio").value || 'Não informado',
+      modeloEquipamento: document.getElementById("modeloEquipamento").value || 'Não informado',
+      nomeAcompanhante: document.getElementById("nomeAcompanhante").value || 'Não informado',
       kmInicial: document.getElementById("kmInicial").value || 'Não informado',
       kmFinal: document.getElementById("kmFinal").value || 'Não informado',
       kmTotal: document.getElementById("kmTotal").value || 'Não informado',
@@ -85,8 +92,23 @@ async function sendToDiscord(content) {
           inline: true
         },
         {
+          name: "🧑‍🔧 Técnico e Parceiro",
+          value: `Técnico: ${dados.nomeTecnico}\nParceiro: ${dados.parceiro}\nTelefone: ${dados.telefoneTecnico}`,
+          inline: true
+        },
+        {
           name: "🔧 Patrimônios",
           value: dados.quantidadePatrimonios,
+          inline: true
+        },
+        {
+          name: "🔍 Problema e Equipamento",
+          value: `Problema: ${dados.problemaIdentificado}\nPatrimônio: ${dados.numeroPatrimonio}\nModelo: ${dados.modeloEquipamento}`,
+          inline: true
+        },
+        {
+          name: "👥 Acompanhamento",
+          value: dados.nomeAcompanhante,
           inline: true
         },
         {
@@ -96,7 +118,7 @@ async function sendToDiscord(content) {
         },
         {
           name: "⏰ Horários",
-          value: `Chegada: ${dados.horaChegada}\nSaída: ${dados.horaSaida}\nTempo Total: ${dados.tempoTotal}`,
+          value: `Início: ${dados.horaChegada}\nTérmino: ${dados.horaSaida}\nTempo Total: ${dados.tempoTotal}`,
           inline: true
         },
         {
@@ -110,7 +132,7 @@ async function sendToDiscord(content) {
           inline: false
         },
         {
-          name: "📝 Descrição do Chamado",
+          name: "📝 Atividade Realizada",
           value: dados.descricaoChamado,
           inline: false
         },
@@ -133,12 +155,19 @@ async function sendToDiscord(content) {
       `Nº do chamado: ${dados.numeroChamado}\n` +
       `Tipo de chamado: ${dados.tipoChamado}\n` +
       `Cliente: ${dados.cliente}\n` +
+      `Parceiro: ${dados.parceiro}\n` +
+      `Nome do Técnico: ${dados.nomeTecnico}\n` +
+      `Telefone do Técnico: ${dados.telefoneTecnico}\n` +
       `Informante: ${dados.nomeInformante}\n\n` +
       
       `=== DETALHES DO SERVIÇO ===\n` +
       `Quantidade de patrimônios: ${dados.quantidadePatrimonios}\n` +
       `Status: ${dados.statusChamado}\n` +
-      `Descrição: ${dados.descricaoChamado}\n\n` +
+      `Problema identificado: ${dados.problemaIdentificado}\n` +
+      `Nº Patrimônio/serial: ${dados.numeroPatrimonio}\n` +
+      `Modelo do equipamento: ${dados.modeloEquipamento}\n` +
+      `Nome de quem acompanhou: ${dados.nomeAcompanhante}\n` +
+      `Atividade Realizada: ${dados.descricaoChamado}\n\n` +
       
       `=== DESLOCAMENTO ===\n` +
       `KM inicial: ${dados.kmInicial}\n` +
@@ -148,8 +177,8 @@ async function sendToDiscord(content) {
       `Endereço de chegada: ${dados.enderecoChegada}\n\n` +
       
       `=== TEMPO DE ATENDIMENTO ===\n` +
-      `Horário de chegada: ${dados.horaChegada}\n` +
-      `Horário de saída: ${dados.horaSaida}\n` +
+      `Início da atividade: ${dados.horaChegada}\n` +
+      `Término da atividade: ${dados.horaSaida}\n` +
       `Tempo total de atendimento: ${dados.tempoTotal}\n` +
       "\`\`\`";
 
@@ -696,7 +725,9 @@ function atualizarBarraProgresso() {
   try {
     const campos = [
       "dataChamado", "numeroChamado", "tipoChamado", "cliente", "nomeInformante",
-      "quantidadePatrimonios", "kmInicial", "kmFinal", "horaChegada", "horaSaida", 
+      "parceiro", "nomeTecnico", "telefoneTecnico", 
+      "quantidadePatrimonios", "problemaIdentificado", "numeroPatrimonio", "modeloEquipamento", "nomeAcompanhante",
+      "kmInicial", "kmFinal", "horaChegada", "horaSaida", 
       "enderecoPartida", "enderecoChegada", "descricaoChamado", "statusChamado"
     ];
     
@@ -1027,6 +1058,9 @@ async function enviarRelatorioCombinado() {
       { id: "numeroChamado", nome: "Número do chamado" },
       { id: "tipoChamado", nome: "Tipo do chamado" },
       { id: "cliente", nome: "Cliente" },
+      { id: "parceiro", nome: "Parceiro" },
+      { id: "nomeTecnico", nome: "Nome do Técnico" },
+      { id: "problemaIdentificado", nome: "Problema identificado" },
       { id: "statusChamado", nome: "Status do chamado" }
     ];
     

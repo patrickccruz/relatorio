@@ -10,7 +10,7 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
 - **Barra de progresso** que mostra o percentual de preenchimento do formulário
 - **Cálculos automáticos**:
   - Quilometragem total (KM final - KM inicial)
-  - Tempo total de atendimento (baseado nos horários de chegada e saída)
+  - Tempo total de atendimento (baseado nos horários de início e término)
 - **Preenchimento automático** da data atual
 - **Autocomplete de endereços** utilizando a API Nominatim do OpenStreetMap
 - **Envio de relatórios** para múltiplas plataformas:
@@ -19,6 +19,39 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
   - Compartilhamento via WhatsApp
 - **Armazenamento local** dos dados do formulário (localStorage)
 - **Validação de campos** obrigatórios antes do envio
+
+## Campos do Formulário
+
+### Informações Básicas
+- Data do chamado
+- Número do chamado
+- Tipo de chamado
+- Cliente
+- Parceiro
+- Nome do técnico
+- Nome de quem informou o chamado
+- Telefone de contato do técnico
+
+### Detalhes do Serviço
+- Quantidade de patrimônios tratados
+- Status do chamado
+- Problema identificado
+- Atividade realizada
+- Nº Patrimônio/serial
+- Modelo do equipamento
+- Nome de quem acompanhou a atividade
+
+### Deslocamento
+- KM inicial
+- KM final
+- KM total percorrido (calculado automaticamente)
+- Endereço de partida
+- Endereço de chegada
+
+### Tempo de Atendimento
+- Início da atividade
+- Término da atividade
+- Tempo total de atendimento (calculado automaticamente)
 
 ## Tecnologias Utilizadas
 
@@ -75,10 +108,10 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
 
 1. Abra a aplicação em um navegador
 2. Preencha os campos do formulário:
-   - **Informações Básicas**: data, número do chamado, tipo, cliente, etc.
-   - **Detalhes do Serviço**: quantidade de patrimônios, status, descrição
+   - **Informações Básicas**: data, número do chamado, tipo, cliente, parceiro, nome do técnico, etc.
+   - **Detalhes do Serviço**: problema identificado, atividade realizada, patrimônio/serial, modelo do equipamento, etc.
    - **Deslocamento**: km inicial/final, endereços
-   - **Tempo de Atendimento**: horário de chegada e saída
+   - **Tempo de Atendimento**: início e término da atividade
 3. Os campos de KM total e Tempo total serão calculados automaticamente
 4. Use o recurso de autocomplete para preencher endereços mais facilmente
 5. Clique em "Enviar e Copiar Relatório" para:
@@ -130,6 +163,103 @@ Para adicionar ou remover campos do formulário:
 1. Modifique as seções relevantes em `index.html`
 2. Atualize as funções em `script.js` (especialmente `infoGeral()` e `atualizarBarraProgresso()`)
 3. Ajuste as funções que criam os relatórios para Discord e WhatsApp
+
+### Implementação das Alterações Recentes
+
+Para implementar as alterações recentes no formulário:
+
+#### 1. Inclusão de Novos Campos
+
+Adicione os seguintes campos nas seções apropriadas do arquivo `index.html`:
+
+```html
+<!-- Em Informações Básicas -->
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="parceiro" oninput="infoGeral()">
+    <label for="parceiro">Parceiro:</label>
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="nomeTecnico" oninput="infoGeral()">
+    <label for="nomeTecnico">Nome do Técnico:</label>
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="tel" class="form-control" id="telefoneTecnico" oninput="infoGeral()">
+    <label for="telefoneTecnico">Telefone de contato do Técnico:</label>
+  </div>
+</div>
+
+<!-- Em Detalhes do Serviço -->
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="problemaIdentificado" oninput="infoGeral()">
+    <label for="problemaIdentificado">Problema identificado:</label>
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="numeroPatrimonio" oninput="infoGeral()">
+    <label for="numeroPatrimonio">N.º Patrimônio/serial:</label>
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="modeloEquipamento" oninput="infoGeral()">
+    <label for="modeloEquipamento">Modelo do equipamento:</label>
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="nomeAcompanhante" oninput="infoGeral()">
+    <label for="nomeAcompanhante">Nome de quem acompanhou a atividade:</label>
+  </div>
+</div>
+```
+
+#### 2. Alteração de Labels Existentes
+
+Substitua os labels dos campos existentes:
+
+- Altere "Horário de chegada" para "Início da Atividade"
+- Altere "Horário de saída" para "Término da Atividade"
+- Altere "Breve descrição do chamado" para "Atividade Realizada"
+
+#### 3. Atualização do JavaScript
+
+Atualize o arquivo `script.js` para incluir os novos campos:
+
+1. Adicione os novos campos à função `infoGeral()`
+2. Atualize a função `atualizarBarraProgresso()` para incluir os novos campos
+3. Modifique as funções de geração de relatório para Discord e WhatsApp
+
+Exemplo de inclusão na função que cria o embed do Discord:
+
+```javascript
+// Adicionar campos ao embed do Discord
+fields: [
+  // ... campos existentes ...
+  {
+    name: "🧑‍🔧 Técnico e Parceiro",
+    value: `Técnico: ${dados.nomeTecnico}\nParceiro: ${dados.parceiro}\nTelefone: ${dados.telefoneTecnico}`,
+    inline: true
+  },
+  {
+    name: "🔍 Problema e Equipamento",
+    value: `Problema: ${dados.problemaIdentificado}\nPatrimônio: ${dados.numeroPatrimonio}\nModelo: ${dados.modeloEquipamento}`,
+    inline: true
+  },
+  {
+    name: "👥 Acompanhamento",
+    value: dados.nomeAcompanhante,
+    inline: true
+  },
+  // ... outros campos ...
+]
+```
 
 ### Segurança
 

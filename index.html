@@ -207,8 +207,30 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="parceiro" oninput="infoGeral()">
+                      <label for="parceiro">Parceiro:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="nomeTecnico" oninput="infoGeral()">
+                      <label for="nomeTecnico">Nome do Técnico:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
                       <input type="text" class="form-control" id="nomeInformante" oninput="infoGeral()">
                       <label for="nomeInformante">Nome de quem informou o chamado:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="tel" class="form-control" id="telefoneTecnico" oninput="infoGeral()">
+                      <label for="telefoneTecnico">Telefone de contato do Técnico:</label>
                     </div>
                   </div>
                 </div>
@@ -240,9 +262,37 @@
                     </div>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="problemaIdentificado" oninput="infoGeral()">
+                      <label for="problemaIdentificado">Problema identificado:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="numeroPatrimonio" oninput="infoGeral()">
+                      <label for="numeroPatrimonio">N.º Patrimônio/serial:</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="modeloEquipamento" oninput="infoGeral()">
+                      <label for="modeloEquipamento">Modelo do equipamento:</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="nomeAcompanhante" oninput="infoGeral()">
+                      <label for="nomeAcompanhante">Nome de quem acompanhou a atividade:</label>
+                    </div>
+                  </div>
+                </div>
                 <div class="form-floating mb-3">
                   <textarea class="form-control" id="descricaoChamado" style="height: 120px" oninput="infoGeral()"></textarea>
-                  <label for="descricaoChamado">Breve descrição do chamado:</label>
+                  <label for="descricaoChamado">Atividade Realizada:</label>
                 </div>
               </div>
             </div>
@@ -298,13 +348,13 @@
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
                       <input type="time" class="form-control" id="horaChegada" oninput="calcularTempoAtendimento(); infoGeral()">
-                      <label for="horaChegada">Horário de chegada:</label>
+                      <label for="horaChegada">Início da Atividade:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
                       <input type="time" class="form-control" id="horaSaida" oninput="calcularTempoAtendimento(); infoGeral()">
-                      <label for="horaSaida">Horário de saída:</label>
+                      <label for="horaSaida">Término da Atividade:</label>
                     </div>
                   </div>
                 </div>
