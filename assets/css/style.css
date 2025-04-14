@@ -1456,3 +1456,37 @@ select.form-select.is-valid {
   color: #28a745;
   z-index: 3;
 }
+
+/* Estilização uniforme para os checkboxes de fixação */
+.form-check-fixar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px 10px;
+  margin: 0;
+  z-index: 5;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 0 4px 0 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-fixar .form-check-input {
+  margin-top: 0.3em;
+}
+
+.form-check-fixar .form-check-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #495057;
+  margin-left: 4px;
+}
+
+/* Estilo quando o checkbox está marcado */
+.form-check-fixar .form-check-input:checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.form-check-fixar .form-check-input:checked + .form-check-label {
+  color: #28a745;
+}

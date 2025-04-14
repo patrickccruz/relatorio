@@ -11,32 +11,37 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
 - **Cálculos automáticos**:
   - Quilometragem total (KM final - KM inicial)
   - Tempo total de atendimento (baseado nos horários de início e término)
-- **Preenchimento automático** da data atual
+- **Preenchimento automático** da data atual sempre que a página é aberta
 - **Autocomplete de endereços** utilizando a API Nominatim do OpenStreetMap
+- **Campos com valores fixos**:
+  - Possibilidade de fixar o parceiro, nome do técnico e telefone do técnico
+  - Valores fixos são preservados mesmo ao limpar o formulário
+  - Identificação visual para campos fixos com cor diferenciada e ícone
 - **Envio de relatórios** para múltiplas plataformas:
   - Cópia para área de transferência
   - Envio para o Discord via webhook
   - Compartilhamento via WhatsApp
-- **Armazenamento local** dos dados do formulário (localStorage)
+- **Armazenamento local** dos dados do formulário e preferências (localStorage)
+- **Histórico de relatórios enviados** com opções de busca e filtragem
 - **Validação de campos** obrigatórios antes do envio
 
 ## Campos do Formulário
 
 ### Informações Básicas
-- Data do chamado
+- Data do chamado (sempre atualizado para o dia atual)
 - Número do chamado
 - Tipo de chamado
 - Cliente
-- Parceiro
-- Nome do técnico
+- Parceiro (com opção de fixar valor)
+- Nome do técnico (com opção de fixar valor)
 - Nome de quem informou o chamado
-- Telefone de contato do técnico
+- Telefone de contato do técnico (com opção de fixar valor)
 
 ### Detalhes do Serviço
 - Quantidade de patrimônios tratados
 - Status do chamado
 - Problema identificado
-- Atividade realizada
+- Atividade Realizada
 - Nº Patrimônio/serial
 - Modelo do equipamento
 - Nome de quem acompanhou a atividade
@@ -67,13 +72,17 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
 ```
 /
 ├── index.html           # Página principal do formulário
+├── relatorios.html      # Página de histórico de relatórios
 ├── script.js            # Lógica da aplicação
 ├── assets/
 │   ├── img/             # Imagens do projeto
+│   │   ├── logo.png     # Logo do projeto
+│   │   └── favicon.png  # Ícone do site
 │   ├── css/             # Arquivos CSS
-│   │   └── style.css    # Estilos principais
+│   │   └── style.css    # Estilos centralizados
 │   ├── js/              # Scripts adicionais
-│   │   └── main.js      # Inicializações
+│   │   ├── main.js      # Inicializações
+│   │   └── meta-csp.js  # Configurações de segurança
 │   └── vendor/          # Bibliotecas de terceiros
 │       ├── bootstrap/   # Framework Bootstrap
 │       ├── boxicons/    # Ícones
@@ -106,19 +115,36 @@ O Sistema de Registro de Chamados Técnicos é uma aplicação web que permite a
 
 ## Como Usar
 
+### Formulário Principal (index.html)
+
 1. Abra a aplicação em um navegador
-2. Preencha os campos do formulário:
-   - **Informações Básicas**: data, número do chamado, tipo, cliente, parceiro, nome do técnico, etc.
-   - **Detalhes do Serviço**: problema identificado, atividade realizada, patrimônio/serial, modelo do equipamento, etc.
+2. A data será automaticamente preenchida com a data atual
+3. Configure valores fixos (se desejar):
+   - Marque a caixa "Fixar valor" ao lado dos campos Parceiro, Nome do Técnico ou Telefone do Técnico
+   - Os valores fixados serão preservados entre sessões e ao limpar o formulário
+4. Preencha os demais campos do formulário:
+   - **Informações Básicas**: número do chamado, tipo, cliente, etc.
+   - **Detalhes do Serviço**: problema identificado, atividade realizada, patrimônio/serial, etc.
    - **Deslocamento**: km inicial/final, endereços
    - **Tempo de Atendimento**: início e término da atividade
-3. Os campos de KM total e Tempo total serão calculados automaticamente
-4. Use o recurso de autocomplete para preencher endereços mais facilmente
-5. Clique em "Enviar e Copiar Relatório" para:
+5. Os campos de KM total e Tempo total serão calculados automaticamente
+6. Use o recurso de autocomplete para preencher endereços mais facilmente
+7. Clique em "Enviar e Copiar Relatório" para:
    - Copiar o relatório para a área de transferência
    - Enviar para o Discord (se configurado)
    - Compartilhar via WhatsApp
-6. Para limpar o formulário, clique em "Apagar Tudo"
+8. Para limpar o formulário, clique em "Apagar Dados" (os valores fixados não serão apagados)
+
+### Histórico de Relatórios (relatorios.html)
+
+1. Acesse a página de histórico para visualizar todos os relatórios salvos
+2. Utilize a barra de busca para filtrar relatórios por cliente, número, tipo, etc.
+3. Os relatórios são organizados por data, do mais recente para o mais antigo
+4. Para cada relatório, você pode:
+   - Ver detalhes completos
+   - Copiar o relatório para a área de transferência
+   - Excluir o relatório do histórico
+5. Para limpar todo o histórico, use o botão "Limpar Histórico"
 
 ## Configuração
 
@@ -164,102 +190,13 @@ Para adicionar ou remover campos do formulário:
 2. Atualize as funções em `script.js` (especialmente `infoGeral()` e `atualizarBarraProgresso()`)
 3. Ajuste as funções que criam os relatórios para Discord e WhatsApp
 
-### Implementação das Alterações Recentes
+### Configuração de Campos Fixos
 
-Para implementar as alterações recentes no formulário:
+Para modificar a funcionalidade de campos fixos:
 
-#### 1. Inclusão de Novos Campos
-
-Adicione os seguintes campos nas seções apropriadas do arquivo `index.html`:
-
-```html
-<!-- Em Informações Básicas -->
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="parceiro" oninput="infoGeral()">
-    <label for="parceiro">Parceiro:</label>
-  </div>
-</div>
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="nomeTecnico" oninput="infoGeral()">
-    <label for="nomeTecnico">Nome do Técnico:</label>
-  </div>
-</div>
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="tel" class="form-control" id="telefoneTecnico" oninput="infoGeral()">
-    <label for="telefoneTecnico">Telefone de contato do Técnico:</label>
-  </div>
-</div>
-
-<!-- Em Detalhes do Serviço -->
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="problemaIdentificado" oninput="infoGeral()">
-    <label for="problemaIdentificado">Problema identificado:</label>
-  </div>
-</div>
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="numeroPatrimonio" oninput="infoGeral()">
-    <label for="numeroPatrimonio">N.º Patrimônio/serial:</label>
-  </div>
-</div>
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="modeloEquipamento" oninput="infoGeral()">
-    <label for="modeloEquipamento">Modelo do equipamento:</label>
-  </div>
-</div>
-<div class="col-md-6">
-  <div class="form-floating mb-3">
-    <input type="text" class="form-control" id="nomeAcompanhante" oninput="infoGeral()">
-    <label for="nomeAcompanhante">Nome de quem acompanhou a atividade:</label>
-  </div>
-</div>
-```
-
-#### 2. Alteração de Labels Existentes
-
-Substitua os labels dos campos existentes:
-
-- Altere "Horário de chegada" para "Início da Atividade"
-- Altere "Horário de saída" para "Término da Atividade"
-- Altere "Breve descrição do chamado" para "Atividade Realizada"
-
-#### 3. Atualização do JavaScript
-
-Atualize o arquivo `script.js` para incluir os novos campos:
-
-1. Adicione os novos campos à função `infoGeral()`
-2. Atualize a função `atualizarBarraProgresso()` para incluir os novos campos
-3. Modifique as funções de geração de relatório para Discord e WhatsApp
-
-Exemplo de inclusão na função que cria o embed do Discord:
-
-```javascript
-// Adicionar campos ao embed do Discord
-fields: [
-  // ... campos existentes ...
-  {
-    name: "🧑‍🔧 Técnico e Parceiro",
-    value: `Técnico: ${dados.nomeTecnico}\nParceiro: ${dados.parceiro}\nTelefone: ${dados.telefoneTecnico}`,
-    inline: true
-  },
-  {
-    name: "🔍 Problema e Equipamento",
-    value: `Problema: ${dados.problemaIdentificado}\nPatrimônio: ${dados.numeroPatrimonio}\nModelo: ${dados.modeloEquipamento}`,
-    inline: true
-  },
-  {
-    name: "👥 Acompanhamento",
-    value: dados.nomeAcompanhante,
-    inline: true
-  },
-  // ... outros campos ...
-]
-```
+1. Edite as funções `salvarPreferenciasFixas()` e `carregarPreferenciasFixas()` em `script.js`
+2. Adicione novos campos à lista `camposFixos` na função `carregarDadosFormulario()`
+3. Atualize a função `deleteRespGeral()` para incluir os novos campos fixos na lista de exclusões
 
 ### Segurança
 
@@ -279,6 +216,11 @@ Para ambientes de produção, considere:
 
 - **Endereços duplicados**: Ajuste a função `removerDuplicacoes()` em script.js
 - **Cidades não detectadas**: Adicione mais cidades à lista `cidadesComuns` na função `simplificarEndereco()`
+
+### Problemas com Campos Fixos
+
+- **Valores não persistem**: Verifique se o localStorage está ativo no navegador
+- **Estilos visuais não aparecem**: Certifique-se de que o arquivo style.css está carregando corretamente
 
 ### Problemas com o Discord
 
