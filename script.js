@@ -836,6 +836,82 @@ function salvarDadosFormulario() {
   });
   
   localStorage.setItem("formData", JSON.stringify(formData));
+  
+  // Salvar status dos checkboxes de fixação
+  salvarPreferenciasFixas();
+}
+
+// Função para salvar preferências fixas
+function salvarPreferenciasFixas() {
+  const preferenciasFixas = {
+    parceiro: {
+      fixo: document.getElementById('fixarParceiro').checked,
+      valor: document.getElementById('parceiro').value
+    },
+    nomeTecnico: {
+      fixo: document.getElementById('fixarNomeTecnico').checked,
+      valor: document.getElementById('nomeTecnico').value
+    },
+    telefoneTecnico: {
+      fixo: document.getElementById('fixarTelefoneTecnico').checked,
+      valor: document.getElementById('telefoneTecnico').value
+    }
+  };
+  
+  localStorage.setItem("preferenciasFixas", JSON.stringify(preferenciasFixas));
+}
+
+// Função para carregar preferências fixas
+function carregarPreferenciasFixas() {
+  try {
+    const preferenciasFixas = JSON.parse(localStorage.getItem("preferenciasFixas"));
+    
+    if (preferenciasFixas) {
+      // Parceiro
+      if (preferenciasFixas.parceiro) {
+        const checkboxParceiro = document.getElementById('fixarParceiro');
+        const campoParceiro = document.getElementById('parceiro');
+        
+        checkboxParceiro.checked = preferenciasFixas.parceiro.fixo;
+        
+        if (preferenciasFixas.parceiro.fixo && preferenciasFixas.parceiro.valor) {
+          campoParceiro.value = preferenciasFixas.parceiro.valor;
+          campoParceiro.classList.add('is-valid');
+        }
+      }
+      
+      // Nome do Técnico
+      if (preferenciasFixas.nomeTecnico) {
+        const checkboxNomeTecnico = document.getElementById('fixarNomeTecnico');
+        const campoNomeTecnico = document.getElementById('nomeTecnico');
+        
+        checkboxNomeTecnico.checked = preferenciasFixas.nomeTecnico.fixo;
+        
+        if (preferenciasFixas.nomeTecnico.fixo && preferenciasFixas.nomeTecnico.valor) {
+          campoNomeTecnico.value = preferenciasFixas.nomeTecnico.valor;
+          campoNomeTecnico.classList.add('is-valid');
+        }
+      }
+      
+      // Telefone do Técnico
+      if (preferenciasFixas.telefoneTecnico) {
+        const checkboxTelefoneTecnico = document.getElementById('fixarTelefoneTecnico');
+        const campoTelefoneTecnico = document.getElementById('telefoneTecnico');
+        
+        checkboxTelefoneTecnico.checked = preferenciasFixas.telefoneTecnico.fixo;
+        
+        if (preferenciasFixas.telefoneTecnico.fixo && preferenciasFixas.telefoneTecnico.valor) {
+          campoTelefoneTecnico.value = preferenciasFixas.telefoneTecnico.valor;
+          campoTelefoneTecnico.classList.add('is-valid');
+        }
+      }
+      
+      // Atualizar o estilo visual dos campos fixos
+      atualizarEstiloCamposFixos();
+    }
+  } catch (error) {
+    console.error("Erro ao carregar preferências fixas:", error);
+  }
 }
 
 // Função para carregar dados do formulário
@@ -845,14 +921,33 @@ function carregarDadosFormulario() {
   // Sempre definir a data atual primeiro, independentemente dos dados salvos
   definirDataAtual();
   
+  // Carregar preferências fixas
+  carregarPreferenciasFixas();
+  
+  // Obter campos que estão fixos para não sobrescrevê-los
+  const preferenciasFixas = JSON.parse(localStorage.getItem("preferenciasFixas")) || {};
+  const camposFixos = [];
+  
+  if (preferenciasFixas.parceiro && preferenciasFixas.parceiro.fixo) {
+    camposFixos.push('parceiro');
+  }
+  
+  if (preferenciasFixas.nomeTecnico && preferenciasFixas.nomeTecnico.fixo) {
+    camposFixos.push('nomeTecnico');
+  }
+  
+  if (preferenciasFixas.telefoneTecnico && preferenciasFixas.telefoneTecnico.fixo) {
+    camposFixos.push('telefoneTecnico');
+  }
+  
   if (formData) {
     // Identificar todos os inputs, selects e textareas
     const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
     
     // Preencher cada campo com os dados salvos
     formInputs.forEach(input => {
-      // Ignorar o campo de data, pois queremos sempre mostrar a data atual
-      if (input.id && formData[input.id] && input.id !== 'dataChamado') {
+      // Ignorar o campo de data e campos fixos
+      if (input.id && formData[input.id] && input.id !== 'dataChamado' && !camposFixos.includes(input.id)) {
         input.value = formData[input.id];
         
         // Marcar como válido se não for readonly
@@ -928,11 +1023,27 @@ function deleteRespGeral() {
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Limpando...';
 
-    // Limpar todos os campos do formulário
+    // Obter campos que estão fixos para não limpá-los
+    const preferenciasFixas = JSON.parse(localStorage.getItem("preferenciasFixas")) || {};
+    const camposFixos = [];
+    
+    if (preferenciasFixas.parceiro && preferenciasFixas.parceiro.fixo) {
+      camposFixos.push('parceiro');
+    }
+    
+    if (preferenciasFixas.nomeTecnico && preferenciasFixas.nomeTecnico.fixo) {
+      camposFixos.push('nomeTecnico');
+    }
+    
+    if (preferenciasFixas.telefoneTecnico && preferenciasFixas.telefoneTecnico.fixo) {
+      camposFixos.push('telefoneTecnico');
+    }
+
+    // Limpar todos os campos do formulário, exceto os fixos
     const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
     formInputs.forEach(input => {
-      // Não limpar campos de botões
-      if (input.type !== 'button' && input.type !== 'submit') {
+      // Não limpar campos de botões, checkboxes e campos fixos
+      if (input.type !== 'button' && input.type !== 'submit' && input.type !== 'checkbox' && !camposFixos.includes(input.id)) {
         input.value = "";
       }
     });
@@ -941,7 +1052,23 @@ function deleteRespGeral() {
     definirDataAtual();
 
     // Limpar o localStorage
+    const backup = {};
+    
+    // Salvar os valores fixos antes de limpar o localStorage
+    camposFixos.forEach(campo => {
+      backup[campo] = document.getElementById(campo).value;
+    });
+    
     localStorage.removeItem("formData");
+    
+    // Salvar novamente os campos fixos para o localStorage
+    if (camposFixos.length > 0) {
+      const newFormData = {};
+      camposFixos.forEach(campo => {
+        newFormData[campo] = backup[campo];
+      });
+      localStorage.setItem("formData", JSON.stringify(newFormData));
+    }
 
     // Atualizar cálculos
     calcularKmTotal();
@@ -950,7 +1077,7 @@ function deleteRespGeral() {
 
     btn.disabled = false;
     btn.innerHTML = btnText;
-    mostrarToast("Todos os campos foram limpos", "success");
+    mostrarToast("Todos os campos foram limpos (exceto os fixos)", "success");
   } catch (error) {
     console.error("Erro ao limpar formulário:", error);
     showErrorModal("Erro ao limpar o formulário: " + error.message);
@@ -1238,6 +1365,41 @@ function limparHistoricoRelatorios() {
   }
 }
 
+// Função para atualizar o estilo visual dos campos fixos
+function atualizarEstiloCamposFixos() {
+  // Limpar os ícones existentes primeiro para evitar duplicações
+  document.querySelectorAll('.fixed-field-icon').forEach(icone => {
+    icone.remove();
+  });
+  
+  // Remover as classes de estilo de todos os campos
+  const campos = ['parceiro', 'nomeTecnico', 'telefoneTecnico'];
+  campos.forEach(campo => {
+    const elemento = document.getElementById(campo);
+    const label = elemento.nextElementSibling;
+    elemento.classList.remove('fixed-field');
+    label.classList.remove('fixed-field-label');
+  });
+  
+  // Aplicar estilo para os campos fixos
+  campos.forEach(campo => {
+    const checkbox = document.getElementById('fixar' + campo.charAt(0).toUpperCase() + campo.slice(1));
+    if (checkbox && checkbox.checked) {
+      const elemento = document.getElementById(campo);
+      const label = elemento.nextElementSibling;
+      
+      elemento.classList.add('fixed-field');
+      label.classList.add('fixed-field-label');
+      
+      // Adicionar ícone de fixado
+      const icone = document.createElement('i');
+      icone.className = 'bi bi-pin-angle-fill fixed-field-icon';
+      icone.title = 'Este valor está fixado';
+      elemento.parentNode.appendChild(icone);
+    }
+  });
+}
+
 // Inicializações e eventos
 window.onload = function() {
   // Definir a data atual primeiro
@@ -1261,6 +1423,25 @@ window.onload = function() {
   // Adicionar event listeners para botões
   document.querySelector('button.delete-resp-btn')?.addEventListener('click', deleteRespGeral);
   document.querySelector('button.enviar-relatorio-btn')?.addEventListener('click', enviarRelatorioCombinado);
+  
+  // Event listeners para checkboxes de fixação
+  document.getElementById('fixarParceiro')?.addEventListener('change', function() {
+    salvarPreferenciasFixas();
+    atualizarEstiloCamposFixos();
+    mostrarToast(this.checked ? "Valor do parceiro fixado" : "Valor do parceiro não está mais fixo", "success");
+  });
+  
+  document.getElementById('fixarNomeTecnico')?.addEventListener('change', function() {
+    salvarPreferenciasFixas();
+    atualizarEstiloCamposFixos();
+    mostrarToast(this.checked ? "Nome do técnico fixado" : "Nome do técnico não está mais fixo", "success");
+  });
+  
+  document.getElementById('fixarTelefoneTecnico')?.addEventListener('change', function() {
+    salvarPreferenciasFixas();
+    atualizarEstiloCamposFixos();
+    mostrarToast(this.checked ? "Telefone do técnico fixado" : "Telefone do técnico não está mais fixo", "success");
+  });
   
   // Configurar salvamento automático ao digitar ou alterar qualquer campo
   const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
