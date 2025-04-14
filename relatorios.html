@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Histórico de Relatórios</title>
+  <meta content="Histórico de relatórios técnicos de chamados de atendimento em campo" name="description">
+  <meta content="histórico, relatório técnico, chamados, atendimento em campo" name="keywords">
+  <meta name="author" content="Patrick C Cruz">
+
+  <!-- Meta tags de segurança - A tag CSP será substituída pelo script meta-csp.js -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer-when-downgrade">
+
+  <!-- Script de configuração CSP (deve ser carregado primeiro) -->
+  <script src="assets/js/meta-csp.js"></script>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/favicon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="assets/img/logo.png" alt="">
+        <span class="d-none d-lg-block">Script</span>
+      </a>
+      <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+    
+    <!-- Título da página -->
+    <div class="ms-auto me-3 d-none d-md-flex align-items-center">
+    </div>
+  </header><!-- End Header -->
+
+
+  <!-- ======= Sidebar ======= -->
+  <aside id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">
+          <i class="bi bi-grid"></i>
+          <span>Gerador Script</span>
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a class="nav-link active" href="relatorios.html">
+          <i class="bi bi-clock-history"></i>
+          <span>Histórico de Relatórios</span>
+        </a>
+      </li>
+    </ul>
+  </aside><!-- End Sidebar-->
+
+  <main id="main" class="main">
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+          <!-- Informação sobre histórico (versão mobile) -->
+          <div class="d-md-none mb-3">
+            <div class="info-helper d-flex align-items-center mt-2 mb-3">
+              <span class="info-icon me-2"><i class="bi bi-info-circle text-primary"></i></span>
+              <small class="text-muted">Aqui estão todos os relatórios que você já enviou</small>
+            </div>
+          </div>
+          
+          <!-- Filtros e Ações -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar por cliente, número, tipo...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                      <i class="bi bi-search"></i> Buscar
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-4 d-flex justify-content-end mt-3 mt-md-0">
+                  <button type="button" class="btn btn-danger" id="limparHistoricoBtn">
+                    <i class="bi bi-trash"></i> Limpar Histórico
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Container para os relatórios -->
+          <div id="relatoriosContainer">
+            <!-- Os relatórios serão carregados aqui via JavaScript -->
+            <div class="empty-state" id="emptyState">
+              <i class="bi bi-clock-history"></i>
+              <h4>Nenhum relatório encontrado</h4>
+              <p>Os relatórios que você enviar aparecerão aqui.</p>
+              <a href="index.html" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Criar Novo Relatório
+              </a>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Patrick C Cruz</span></strong>. Todos os direitos Reservados
+    </div>
+    <div class="credits">
+      Feito pelo <a href="https://www.linkedin.com/in/patrick-da-costa-cruz-08493212a/" target="_blank">Patrick C
+        Cruz</a>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Modal de Detalhe do Relatório -->
+  <div class="modal fade" id="relatorioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-file-text"></i> Detalhes do Relatório
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="relatorioModalBody">
+          <!-- Detalhes do relatório serão carregados aqui -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-success" id="copiarRelatorioModalBtn">
+            <i class="bi bi-clipboard"></i> Copiar Relatório
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação para Limpar Histórico -->
+  <div class="modal fade" id="confirmacaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle"></i> Confirmação
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Tem certeza que deseja limpar todo o histórico de relatórios? Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmarLimparBtn">
+            <i class="bi bi-trash"></i> Limpar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor JS Files -->
+  <script src="script.js"></script>
+  <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <!-- Toast para feedback instantâneo -->
+  <div class="toast-container float-alert">
+    <div id="toastAlert" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <span id="toastMessage">Relatório copiado para a área de transferência!</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variáveis globais
+    let relatorioAtualId = null;
+    let todosRelatorios = [];
+    let relatoriosFiltrados = [];
+    
+    // Carregar histórico de relatórios quando a página é carregada
+    document.addEventListener('DOMContentLoaded', function() {
+      carregarHistoricoRelatorios();
+      
+      // Event listeners
+      document.getElementById('searchInput').addEventListener('keyup', filtrarRelatorios);
+      document.getElementById('searchButton').addEventListener('click', filtrarRelatorios);
+      
+      document.getElementById('limparHistoricoBtn').addEventListener('click', function() {
+        const confirmacaoModal = new bootstrap.Modal(document.getElementById('confirmacaoModal'));
+        confirmacaoModal.show();
+      });
+      
+      document.getElementById('confirmarLimparBtn').addEventListener('click', function() {
+        if (limparHistoricoRelatorios()) {
+          const confirmacaoModal = bootstrap.Modal.getInstance(document.getElementById('confirmacaoModal'));
+          confirmacaoModal.hide();
+          carregarHistoricoRelatorios();
+        }
+      });
+      
+      document.getElementById('copiarRelatorioModalBtn').addEventListener('click', function() {
+        if (relatorioAtualId) {
+          copiarRelatorioHistorico(relatorioAtualId);
+        }
+      });
+    });
+    
+    // Função para carregar o histórico de relatórios
+    function carregarHistoricoRelatorios() {
+      todosRelatorios = obterHistoricoRelatorios();
+      relatoriosFiltrados = [...todosRelatorios];
+      renderizarRelatorios(relatoriosFiltrados);
+    }
+    
+    // Função para filtrar os relatórios
+    function filtrarRelatorios() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      
+      if (!query.trim()) {
+        relatoriosFiltrados = [...todosRelatorios];
+      } else {
+        relatoriosFiltrados = todosRelatorios.filter(relatorio => {
+          return (
+            relatorio.cliente.toLowerCase().includes(query) ||
+            relatorio.numeroChamado.toLowerCase().includes(query) ||
+            relatorio.tipoChamado.toLowerCase().includes(query) ||
+            relatorio.problemaIdentificado.toLowerCase().includes(query) ||
+            relatorio.statusChamado.toLowerCase().includes(query)
+          );
+        });
+      }
+      
+      renderizarRelatorios(relatoriosFiltrados);
+    }
+    
+    // Função para renderizar os relatórios na tela
+    function renderizarRelatorios(relatorios) {
+      const container = document.getElementById('relatoriosContainer');
+      const emptyState = document.getElementById('emptyState');
+      
+      // Limpar o container
+      container.innerHTML = '';
+      
+      if (relatorios.length === 0) {
+        // Mostrar estado vazio
+        container.appendChild(emptyState);
+        return;
+      }
+      
+      // Agrupar relatórios por data
+      const relatoriosPorData = agruparPorData(relatorios);
+      
+      // Renderizar cada grupo de data
+      for (const [data, grupoRelatorios] of Object.entries(relatoriosPorData)) {
+        // Adicionar cabeçalho de data
+        const dataHeader = document.createElement('div');
+        dataHeader.className = 'timeline-date';
+        dataHeader.textContent = data;
+        container.appendChild(dataHeader);
+        
+        // Renderizar cada relatório desse grupo
+        grupoRelatorios.forEach(relatorio => {
+          const reportCard = criarCardRelatorio(relatorio);
+          container.appendChild(reportCard);
+        });
+      }
+    }
+    
+    // Função para agrupar relatórios por data
+    function agruparPorData(relatorios) {
+      const grupos = {};
+      
+      relatorios.forEach(relatorio => {
+        // Formatar a data
+        const data = new Date(relatorio.dataCriacao);
+        const dataFormatada = data.toLocaleDateString('pt-BR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        });
+        
+        // Criar grupo se não existir
+        if (!grupos[dataFormatada]) {
+          grupos[dataFormatada] = [];
+        }
+        
+        // Adicionar relatório ao grupo
+        grupos[dataFormatada].push(relatorio);
+      });
+      
+      return grupos;
+    }
+    
+    // Função para criar o card de um relatório
+    function criarCardRelatorio(relatorio) {
+      const card = document.createElement('div');
+      card.className = `card report-item status-${relatorio.statusChamado.toLowerCase()}`;
+      card.dataset.id = relatorio.id;
+      
+      // Formatar a data
+      const data = new Date(relatorio.dataCriacao);
+      const dataFormatada = data.toLocaleString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      // Cabeçalho do card
+      const cardHeader = document.createElement('div');
+      cardHeader.className = 'report-header';
+      cardHeader.innerHTML = `
+        <div>
+          <strong>${relatorio.cliente}</strong> - Chamado #${relatorio.numeroChamado}
+        </div>
+        <div class="report-date">
+          <small class="text-muted">
+            <i class="bi bi-clock"></i> ${dataFormatada}
+          </small>
+        </div>
+      `;
+      
+      // Corpo do card
+      const cardBody = document.createElement('div');
+      cardBody.className = 'report-body';
+      cardBody.innerHTML = `
+        <div class="row">
+          <div class="col-md-6">
+            <p>
+              <i class="bi bi-tag"></i> <strong>Tipo:</strong> ${relatorio.tipoChamado}<br>
+              <i class="bi bi-person"></i> <strong>Técnico:</strong> ${relatorio.nomeTecnico}<br>
+              <i class="bi bi-wrench"></i> <strong>Problema:</strong> ${relatorio.problemaIdentificado}
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p>
+              <i class="bi bi-building"></i> <strong>Parceiro:</strong> ${relatorio.parceiro}<br>
+              <i class="bi bi-geo-alt"></i> <strong>Endereço:</strong> ${formatarEndereco(relatorio.enderecoChegada)}<br>
+              <i class="bi bi-check-circle"></i> <strong>Status:</strong> <span class="badge bg-${statusColor(relatorio.statusChamado)}">${relatorio.statusChamado}</span>
+            </p>
+          </div>
+        </div>
+      `;
+      
+      // Botões de ação
+      const cardActions = document.createElement('div');
+      cardActions.className = 'report-actions';
+      cardActions.innerHTML = `
+        <button class="btn btn-sm btn-outline-primary ver-btn" data-id="${relatorio.id}">
+          <i class="bi bi-eye"></i> Ver Detalhes
+        </button>
+        <button class="btn btn-sm btn-outline-success copiar-btn" data-id="${relatorio.id}">
+          <i class="bi bi-clipboard"></i> Copiar Relatório
+        </button>
+        <button class="btn btn-sm btn-outline-danger excluir-btn" data-id="${relatorio.id}">
+          <i class="bi bi-trash"></i> Excluir
+        </button>
+      `;
+      
+      // Adicionar os elementos ao card
+      card.appendChild(cardHeader);
+      card.appendChild(cardBody);
+      card.appendChild(cardActions);
+      
+      // Adicionar event listeners para os botões
+      setTimeout(() => {
+        const verBtn = card.querySelector('.ver-btn');
+        verBtn.addEventListener('click', () => abrirDetalhesRelatorio(relatorio.id));
+        
+        const copiarBtn = card.querySelector('.copiar-btn');
+        copiarBtn.addEventListener('click', () => copiarRelatorioHistorico(relatorio.id));
+        
+        const excluirBtn = card.querySelector('.excluir-btn');
+        excluirBtn.addEventListener('click', () => excluirRelatorioCard(relatorio.id));
+      }, 0);
+      
+      return card;
+    }
+    
+    // Função para abrir o modal de detalhes do relatório
+    function abrirDetalhesRelatorio(relatorioId) {
+      // Encontrar o relatório pelo ID
+      const relatorio = todosRelatorios.find(r => r.id === relatorioId);
+      
+      if (!relatorio) {
+        mostrarToast("Relatório não encontrado", "error");
+        return;
+      }
+      
+      // Armazenar o ID do relatório atual
+      relatorioAtualId = relatorioId;
+      
+      // Formatar os detalhes do relatório para o modal
+      const modalBody = document.getElementById('relatorioModalBody');
+      
+      // Formatar a data
+      const data = new Date(relatorio.dataCriacao);
+      const dataFormatada = data.toLocaleString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      // Preencher o conteúdo do modal
+      modalBody.innerHTML = `
+        <div class="report-detail">
+          <h4>${relatorio.cliente} - Chamado #${relatorio.numeroChamado}</h4>
+          <p class="text-muted"><i class="bi bi-clock"></i> Criado em: ${dataFormatada}</p>
+          
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <h5>Informações Básicas</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Data do Chamado:</span> <strong>${relatorio.data}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Tipo:</span> <strong>${relatorio.tipoChamado}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Status:</span> <span class="badge bg-${statusColor(relatorio.statusChamado)}">${relatorio.statusChamado}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Parceiro:</span> <strong>${relatorio.parceiro}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Técnico:</span> <strong>${relatorio.nomeTecnico}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Telefone:</span> <strong>${relatorio.telefoneTecnico}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Informante:</span> <strong>${relatorio.nomeInformante}</strong>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="col-md-6">
+              <h5>Detalhes do Serviço</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Problema:</span> <strong>${relatorio.problemaIdentificado}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Patrimônios:</span> <strong>${relatorio.quantidadePatrimonios}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Nº Patrimônio:</span> <strong>${relatorio.numeroPatrimonio}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Modelo:</span> <strong>${relatorio.modeloEquipamento}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Acompanhante:</span> <strong>${relatorio.nomeAcompanhante}</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <h5>Deslocamento</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>KM Inicial:</span> <strong>${relatorio.kmInicial}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>KM Final:</span> <strong>${relatorio.kmFinal}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>KM Total:</span> <strong>${relatorio.kmTotal}</strong>
+                </li>
+                <li class="list-group-item">
+                  <span>Endereço Partida:</span><br>
+                  <strong>${relatorio.enderecoPartida}</strong>
+                </li>
+                <li class="list-group-item">
+                  <span>Endereço Chegada:</span><br>
+                  <strong>${relatorio.enderecoChegada}</strong>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="col-md-6">
+              <h5>Tempo</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Hora Chegada:</span> <strong>${relatorio.horaChegada}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Hora Saída:</span> <strong>${relatorio.horaSaida}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Tempo Total:</span> <strong>${relatorio.tempoTotal}</strong>
+                </li>
+              </ul>
+              
+              <h5 class="mt-4">Descrição</h5>
+              <div class="card mt-2">
+                <div class="card-body">
+                  ${relatorio.descricaoChamado.replace(/\n/g, '<br>')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Abrir o modal
+      const modal = new bootstrap.Modal(document.getElementById('relatorioModal'));
+      modal.show();
+    }
+    
+    // Função para excluir relatório do card
+    function excluirRelatorioCard(relatorioId) {
+      if (confirm('Tem certeza que deseja excluir este relatório?')) {
+        if (excluirRelatorio(relatorioId)) {
+          // Atualizar arrays
+          todosRelatorios = todosRelatorios.filter(r => r.id !== relatorioId);
+          relatoriosFiltrados = relatoriosFiltrados.filter(r => r.id !== relatorioId);
+          
+          // Atualizar a visualização
+          renderizarRelatorios(relatoriosFiltrados);
+        }
+      }
+    }
+    
+    // Função para obter a cor do status
+    function statusColor(status) {
+      switch (status.toLowerCase()) {
+        case 'resolvido':
+          return 'success';
+        case 'pendente':
+          return 'warning';
+        case 'improdutivo':
+          return 'danger';
+        default:
+          return 'secondary';
+      }
+    }
+    
+    // Função para formatar endereço (exibir apenas os primeiros 50 caracteres)
+    function formatarEndereco(endereco) {
+      if (endereco.length > 50) {
+        return endereco.substring(0, 50) + '...';
+      }
+      return endereco;
+    }
+  </script>
+
+</body>
+
+</html> 

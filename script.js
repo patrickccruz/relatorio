@@ -16,22 +16,11 @@ if (typeof process === 'undefined') {
 
 // Função para obter a URL do webhook de forma segura
 function getWebhookUrl() {
-  // Em produção, isso poderia ser carregado de:
-  // 1. Uma variável de ambiente via servidor
-  // 2. Um arquivo de configuração carregado pelo servidor
-  // 3. Uma API segura que retorna a configuração após autenticação
+  // URL do webhook do Discord - já configurada
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1360296356144480266/FoS8X0j3cRQVknl5qJoxiFr4e6OojnQ7XhyscYwDAZFufyx1UYb7t216LKkR8ocpWaZm";
   
-  // Para este exemplo, usamos uma abordagem simples com localStorage
-  // Em produção, deve-se usar um método mais seguro conforme mencionado acima
-  let webhookUrl = localStorage.getItem('discord_webhook_url');
-  
-  // Se não estiver configurado, use a URL padrão (somente desenvolvimento)
-  if (!webhookUrl && process.env.NODE_ENV !== 'production') {
-    // URL padrão para desenvolvimento - NÃO USE EM PRODUÇÃO
-    return 'https://discord.com/api/webhooks/1360296356144480266/FoS8X0j3cRQVknl5qJoxiFr4e6OojnQ7XhyscYwDAZFufyx1UYb7t216LKkR8ocpWaZm';
-  }
-  
-  return webhookUrl;
+  // Retorna a URL diretamente, sem verificação
+  return DISCORD_WEBHOOK_URL;
 }
 
 // Função para enviar para o webhook do Discord
@@ -150,36 +139,23 @@ async function sendToDiscord(content) {
 
     // Criar o texto formatado para cópia fácil
     const textoFormatado = "\`\`\`" + 
-      `=== INFORMAÇÕES BÁSICAS ===\n` +
+      `Relatório de Chamado\n\n` +
       `Data do chamado: ${dados.dataChamado}\n` +
       `Nº do chamado: ${dados.numeroChamado}\n` +
       `Tipo de chamado: ${dados.tipoChamado}\n` +
       `Cliente: ${dados.cliente}\n` +
-      `Parceiro: ${dados.parceiro}\n` +
-      `Nome do Técnico: ${dados.nomeTecnico}\n` +
-      `Telefone do Técnico: ${dados.telefoneTecnico}\n` +
-      `Informante: ${dados.nomeInformante}\n\n` +
-      
-      `=== DETALHES DO SERVIÇO ===\n` +
       `Quantidade de patrimônios: ${dados.quantidadePatrimonios}\n` +
-      `Status: ${dados.statusChamado}\n` +
-      `Problema identificado: ${dados.problemaIdentificado}\n` +
-      `Nº Patrimônio/serial: ${dados.numeroPatrimonio}\n` +
-      `Modelo do equipamento: ${dados.modeloEquipamento}\n` +
-      `Nome de quem acompanhou: ${dados.nomeAcompanhante}\n` +
-      `Atividade Realizada: ${dados.descricaoChamado}\n\n` +
-      
-      `=== DESLOCAMENTO ===\n` +
       `KM inicial: ${dados.kmInicial}\n` +
       `KM final: ${dados.kmFinal}\n` +
       `KM total percorrido: ${dados.kmTotal}\n` +
-      `Endereço de partida: ${dados.enderecoPartida}\n` +
-      `Endereço de chegada: ${dados.enderecoChegada}\n\n` +
-      
-      `=== TEMPO DE ATENDIMENTO ===\n` +
-      `Início da atividade: ${dados.horaChegada}\n` +
-      `Término da atividade: ${dados.horaSaida}\n` +
+      `Horário de chegada: ${dados.horaChegada}\n` +
+      `Horário de saída: ${dados.horaSaida}\n` +
       `Tempo total de atendimento: ${dados.tempoTotal}\n` +
+      `Endereço de partida: ${dados.enderecoPartida}\n` +
+      `Endereço de chegada: ${dados.enderecoChegada}\n` +
+      `Descrição: ${dados.descricaoChamado}\n` +
+      `Informante: ${dados.nomeInformante}\n` +
+      `Status: ${dados.statusChamado}` +
       "\`\`\`";
 
     const response = await fetch(webhookUrl, {
@@ -720,75 +696,62 @@ function calcularTempoAtendimento() {
   }
 }
 
-// Função para atualizar a barra de progresso
+// Função para marcar campos obrigatórios (anteriormente atualizarBarraProgresso)
 function atualizarBarraProgresso() {
   try {
-    const campos = [
-      "dataChamado", "numeroChamado", "tipoChamado", "cliente", "nomeInformante",
-      "parceiro", "nomeTecnico", "telefoneTecnico", 
-      "quantidadePatrimonios", "problemaIdentificado", "numeroPatrimonio", "modeloEquipamento", "nomeAcompanhante",
-      "kmInicial", "kmFinal", "horaChegada", "horaSaida", 
-      "enderecoPartida", "enderecoChegada", "descricaoChamado", "statusChamado"
+    // Definir campos obrigatórios
+    const camposObrigatorios = [
+      "dataChamado", "numeroChamado", "tipoChamado", "cliente", 
+      "parceiro", "nomeTecnico", "statusChamado", "problemaIdentificado"
     ];
     
-    let camposPreenchidos = 0;
-    let totalCampos = 0;
-    
-    campos.forEach(campo => {
-      const elemento = document.getElementById(campo);
-      if (elemento) {
-        totalCampos++;
-        if (elemento.value !== "" && elemento.value !== null) {
-          camposPreenchidos++;
+    // Verificar TODOS os campos e adicionar verificação visual
+    const todosOsCampos = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
+    todosOsCampos.forEach(elemento => {
+      // Ignorar campos readonly ou sem ID
+      if (elemento.readOnly || !elemento.id) return;
+      
+      // Se o campo está preenchido, adicionar classe is-valid
+      if (elemento.value && elemento.value.trim() !== "") {
+        elemento.classList.add('is-valid');
+        elemento.classList.remove('is-invalid');
+        
+        // Se for um campo obrigatório, remover marcação visual de obrigatório
+        if (camposObrigatorios.includes(elemento.id)) {
+          const formGroup = elemento.closest('.form-floating, .form-group');
+          if (formGroup) {
+            formGroup.classList.remove('required-field');
+          }
+        }
+      } else {
+        // Se está vazio, remover classe de válido
+        elemento.classList.remove('is-valid');
+        
+        // Se for campo obrigatório não preenchido, adicionar marcação visual
+        if (camposObrigatorios.includes(elemento.id)) {
+          const formGroup = elemento.closest('.form-floating, .form-group');
+          if (formGroup) {
+            formGroup.classList.add('required-field');
+          }
         }
       }
     });
     
-    if (totalCampos === 0) return; // Evita divisão por zero
+    // Verificar se todos os campos obrigatórios estão preenchidos
+    const todosObrigatoriosPreenchidos = camposObrigatorios.every(campo => {
+      const elemento = document.getElementById(campo);
+      return elemento && elemento.value && elemento.value.trim() !== "";
+    });
     
-    const percentual = Math.round((camposPreenchidos / totalCampos) * 100);
-    
-    const barraProgresso = document.getElementById("formProgress");
-    const barraProgressoMobile = document.getElementById("formProgressMobile");
-    const textoProgresso = document.getElementById("progressText");
-    
-    if (barraProgresso) {
-      barraProgresso.style.width = percentual + "%";
-      barraProgresso.setAttribute("aria-valuenow", percentual);
+    // Se todos os campos obrigatórios estiverem preenchidos, mostrar feedback
+    if (todosObrigatoriosPreenchidos) {
+      mostrarToast("Todos os campos obrigatórios preenchidos!", "success");
     }
     
-    if (barraProgressoMobile) {
-      barraProgressoMobile.style.width = percentual + "%";
-      barraProgressoMobile.setAttribute("aria-valuenow", percentual);
-    }
-    
-    if (textoProgresso) {
-      textoProgresso.textContent = percentual + "% Preenchido";
-    }
-    
-    // Mudar a cor da barra de progresso conforme o percentual
-    if (barraProgresso && barraProgressoMobile) {
-      if (percentual < 30) {
-        barraProgresso.classList.remove("bg-warning", "bg-success");
-        barraProgresso.classList.add("bg-danger");
-        barraProgressoMobile.classList.remove("bg-warning", "bg-success");
-        barraProgressoMobile.classList.add("bg-danger");
-      } else if (percentual < 70) {
-        barraProgresso.classList.remove("bg-danger", "bg-success");
-        barraProgresso.classList.add("bg-warning");
-        barraProgressoMobile.classList.remove("bg-danger", "bg-success");
-        barraProgressoMobile.classList.add("bg-warning");
-      } else {
-        barraProgresso.classList.remove("bg-danger", "bg-warning");
-        barraProgresso.classList.add("bg-success");
-        barraProgressoMobile.classList.remove("bg-danger", "bg-warning");
-        barraProgressoMobile.classList.add("bg-success");
-      }
-    }
   } catch (error) {
     // Silencia erros em produção
     if (process.env.NODE_ENV !== 'production') {
-      console.error('Erro ao atualizar barra de progresso:', error);
+      console.error('Erro ao verificar campos obrigatórios:', error);
     }
   }
 }
@@ -853,43 +816,40 @@ function removerDuplicacoes(endereco) {
 
 // Função para salvar dados do formulário
 function salvarDadosFormulario() {
-  const formData = {
-    dataChamado: document.getElementById("dataChamado").value,
-    numeroChamado: document.getElementById("numeroChamado").value,
-    tipoChamado: document.getElementById("tipoChamado").value,
-    cliente: document.getElementById("cliente").value,
-    quantidadePatrimonios: document.getElementById("quantidadePatrimonios").value,
-    kmInicial: document.getElementById("kmInicial").value,
-    kmFinal: document.getElementById("kmFinal").value,
-    horaChegada: document.getElementById("horaChegada").value,
-    horaSaida: document.getElementById("horaSaida").value,
-    enderecoPartida: document.getElementById("enderecoPartida").value,
-    enderecoChegada: document.getElementById("enderecoChegada").value,
-    descricaoChamado: document.getElementById("descricaoChamado").value,
-    nomeInformante: document.getElementById("nomeInformante").value,
-    statusChamado: document.getElementById("statusChamado").value
-  };
+  // Obter todos os inputs, selects e textareas do formulário
+  const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
+  
+  const formData = {};
+  
+  // Salvar o valor de cada campo
+  formInputs.forEach(input => {
+    if (input.id) {
+      formData[input.id] = input.value;
+    }
+  });
+  
   localStorage.setItem("formData", JSON.stringify(formData));
 }
 
 // Função para carregar dados do formulário
 function carregarDadosFormulario() {
   const formData = JSON.parse(localStorage.getItem("formData"));
+  
   if (formData) {
-    document.getElementById("dataChamado").value = formData.dataChamado || "";
-    document.getElementById("numeroChamado").value = formData.numeroChamado || "";
-    document.getElementById("tipoChamado").value = formData.tipoChamado || "";
-    document.getElementById("cliente").value = formData.cliente || "";
-    document.getElementById("quantidadePatrimonios").value = formData.quantidadePatrimonios || "";
-    document.getElementById("kmInicial").value = formData.kmInicial || "";
-    document.getElementById("kmFinal").value = formData.kmFinal || "";
-    document.getElementById("horaChegada").value = formData.horaChegada || "";
-    document.getElementById("horaSaida").value = formData.horaSaida || "";
-    document.getElementById("enderecoPartida").value = formData.enderecoPartida || "";
-    document.getElementById("enderecoChegada").value = formData.enderecoChegada || "";
-    document.getElementById("descricaoChamado").value = formData.descricaoChamado || "";
-    document.getElementById("nomeInformante").value = formData.nomeInformante || "";
-    document.getElementById("statusChamado").value = formData.statusChamado || "";
+    // Identificar todos os inputs, selects e textareas
+    const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
+    
+    // Preencher cada campo com os dados salvos
+    formInputs.forEach(input => {
+      if (input.id && formData[input.id]) {
+        input.value = formData[input.id];
+        
+        // Marcar como válido se não for readonly
+        if (!input.readOnly) {
+          input.classList.add('is-valid');
+        }
+      }
+    });
     
     // Atualizar cálculos após carregar os dados
     calcularKmTotal();
@@ -905,41 +865,32 @@ function carregarDadosFormulario() {
 function infoGeral() {
   salvarDadosFormulario();
 
-  const dataChamado = document.getElementById("dataChamado").value;
-  const numeroChamado = document.getElementById("numeroChamado").value;
-  const tipoChamado = document.getElementById("tipoChamado").value;
-  const cliente = document.getElementById("cliente").value;
-  const quantidadePatrimonios = document.getElementById("quantidadePatrimonios").value;
-  const kmInicial = document.getElementById("kmInicial").value;
-  const kmFinal = document.getElementById("kmFinal").value;
-  const kmTotal = document.getElementById("kmTotal").value;
-  const horaChegada = document.getElementById("horaChegada").value;
-  const horaSaida = document.getElementById("horaSaida").value;
-  const tempoTotal = document.getElementById("tempoTotal").value;
-  const enderecoPartida = document.getElementById("enderecoPartida").value;
-  const enderecoChegada = document.getElementById("enderecoChegada").value;
-  const descricaoChamado = document.getElementById("descricaoChamado").value;
-  const nomeInformante = document.getElementById("nomeInformante").value;
-  const statusChamado = document.getElementById("statusChamado").value;
-
-  // Gerar texto formatado
+  // Gerar texto formatado no padrão solicitado
   const textoCompleto = 
-    `📅 *Data do chamado:* ${dataChamado}\n` +
-    `🔢 *Nº do chamado:* ${numeroChamado}\n` +
-    `📋 *Tipo de chamado:* ${tipoChamado}\n` +
-    `👥 *Cliente:* ${cliente}\n` +
-    `🔧 *Quantidade de patrimônios tratados:* ${quantidadePatrimonios}\n` +
-    `🚗 *KM inicial:* ${kmInicial}\n` +
-    `🚗 *KM final:* ${kmFinal}\n` +
-    `🚗 *KM total percorrido:* ${kmTotal}\n` +
-    `⏰ *Horário de chegada:* ${horaChegada}\n` +
-    `⏰ *Horário de saída:* ${horaSaida}\n` +
-    `⏱️ *Tempo total de atendimento:* ${tempoTotal}\n` +
-    `📍 *Endereço de partida:* ${enderecoPartida}\n` +
-    `📍 *Endereço de chegada:* ${enderecoChegada}\n` +
-    `📝 *Descrição do chamado:*\n${descricaoChamado}\n` +
-    `👤 *Nome de quem informou:* ${nomeInformante}\n` +
-    `📊 *Status do chamado:* ${statusChamado}`;
+    `Relatório de Chamado\n\n` +
+    `Data do chamado: ${document.getElementById("dataChamado").value || 'Não informado'}\n` +
+    `Nº do chamado: ${document.getElementById("numeroChamado").value || 'Não informado'}\n` +
+    `Tipo de chamado: ${document.getElementById("tipoChamado").value || 'Não informado'}\n` +
+    `Cliente: ${document.getElementById("cliente").value || 'Não informado'}\n` +
+    `Parceiro: ${document.getElementById("parceiro").value || 'Não informado'}\n` +
+    `Nome do Técnico: ${document.getElementById("nomeTecnico").value || 'Não informado'}\n` +
+    `Telefone do Técnico: ${document.getElementById("telefoneTecnico").value || 'Não informado'}\n` +
+    `Quantidade de patrimônios: ${document.getElementById("quantidadePatrimonios").value || 'Não informado'}\n` +
+    `Problema identificado: ${document.getElementById("problemaIdentificado").value || 'Não informado'}\n` +
+    `Nº Patrimônio/serial: ${document.getElementById("numeroPatrimonio").value || 'Não informado'}\n` +
+    `Modelo do equipamento: ${document.getElementById("modeloEquipamento").value || 'Não informado'}\n` +
+    `Nome de quem acompanhou: ${document.getElementById("nomeAcompanhante").value || 'Não informado'}\n` +
+    `KM inicial: ${document.getElementById("kmInicial").value || 'Não informado'}\n` +
+    `KM final: ${document.getElementById("kmFinal").value || 'Não informado'}\n` +
+    `KM total percorrido: ${document.getElementById("kmTotal").value || 'Não informado'}\n` +
+    `Horário de chegada: ${document.getElementById("horaChegada").value || 'Não informado'}\n` +
+    `Horário de saída: ${document.getElementById("horaSaida").value || 'Não informado'}\n` +
+    `Tempo total de atendimento: ${document.getElementById("tempoTotal").value || 'Não informado'}\n` +
+    `Endereço de partida: ${document.getElementById("enderecoPartida").value || 'Não informado'}\n` +
+    `Endereço de chegada: ${document.getElementById("enderecoChegada").value || 'Não informado'}\n` +
+    `Descrição: ${document.getElementById("descricaoChamado").value || 'Sem descrição'}\n` +
+    `Informante: ${document.getElementById("nomeInformante").value || 'Não informado'}\n` +
+    `Status: ${document.getElementById("statusChamado").value || 'Não informado'}`;
     
   atualizarBarraProgresso();
   return textoCompleto;
@@ -964,27 +915,19 @@ function showErrorModal(message) {
 // Função para apagar todos os campos
 function deleteRespGeral() {
   try {
-    const btn = document.querySelector('button[onclick="deleteRespGeral()"]');
+    const btn = document.querySelector('button.delete-resp-btn');
     const btnText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Limpando...';
 
-    // Limpar todos os campos
-    document.getElementById("numeroChamado").value = "";
-    document.getElementById("tipoChamado").value = "";
-    document.getElementById("cliente").value = "";
-    document.getElementById("quantidadePatrimonios").value = "";
-    document.getElementById("kmInicial").value = "";
-    document.getElementById("kmFinal").value = "";
-    document.getElementById("kmTotal").value = "";
-    document.getElementById("horaChegada").value = "";
-    document.getElementById("horaSaida").value = "";
-    document.getElementById("tempoTotal").value = "";
-    document.getElementById("enderecoPartida").value = "";
-    document.getElementById("enderecoChegada").value = "";
-    document.getElementById("descricaoChamado").value = "";
-    document.getElementById("nomeInformante").value = "";
-    document.getElementById("statusChamado").value = "";
+    // Limpar todos os campos do formulário
+    const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
+    formInputs.forEach(input => {
+      // Não limpar campos de botões
+      if (input.type !== 'button' && input.type !== 'submit') {
+        input.value = "";
+      }
+    });
 
     // Redefinir data para a data atual
     definirDataAtual();
@@ -992,7 +935,9 @@ function deleteRespGeral() {
     // Limpar o localStorage
     localStorage.removeItem("formData");
 
-    // Atualizar barra de progresso
+    // Atualizar cálculos
+    calcularKmTotal();
+    calcularTempoAtendimento();
     atualizarBarraProgresso();
 
     btn.disabled = false;
@@ -1026,23 +971,30 @@ function copiarRelatorio() {
 // Função para enviar para o WhatsApp
 function enviarWhatsApp() {
   const textoWhatsApp = 
-    `*Relatório de Chamado*\n\n` +
-    `*Data do chamado:* ${document.getElementById("dataChamado").value || 'Não informado'}\n` +
-    `*Nº do chamado:* ${document.getElementById("numeroChamado").value || 'Não informado'}\n` +
-    `*Tipo de chamado:* ${document.getElementById("tipoChamado").value || 'Não informado'}\n` +
-    `*Cliente:* ${document.getElementById("cliente").value || 'Não informado'}\n` +
-    `*Quantidade de patrimônios:* ${document.getElementById("quantidadePatrimonios").value || 'Não informado'}\n` +
-    `*KM inicial:* ${document.getElementById("kmInicial").value || 'Não informado'}\n` +
-    `*KM final:* ${document.getElementById("kmFinal").value || 'Não informado'}\n` +
-    `*KM total percorrido:* ${document.getElementById("kmTotal").value || 'Não informado'}\n` +
-    `*Horário de chegada:* ${document.getElementById("horaChegada").value || 'Não informado'}\n` +
-    `*Horário de saída:* ${document.getElementById("horaSaida").value || 'Não informado'}\n` +
-    `*Tempo total de atendimento:* ${document.getElementById("tempoTotal").value || 'Não informado'}\n` +
-    `*Endereço de partida:* ${document.getElementById("enderecoPartida").value || 'Não informado'}\n` +
-    `*Endereço de chegada:* ${document.getElementById("enderecoChegada").value || 'Não informado'}\n` +
-    `*Descrição:* ${document.getElementById("descricaoChamado").value || 'Sem descrição'}\n` +
-    `*Informante:* ${document.getElementById("nomeInformante").value || 'Não informado'}\n` +
-    `*Status:* ${document.getElementById("statusChamado").value || 'Não informado'}`;
+    `Relatório de Chamado\n\n` +
+    `Data do chamado: ${document.getElementById("dataChamado").value || 'Não informado'}\n` +
+    `Nº do chamado: ${document.getElementById("numeroChamado").value || 'Não informado'}\n` +
+    `Tipo de chamado: ${document.getElementById("tipoChamado").value || 'Não informado'}\n` +
+    `Cliente: ${document.getElementById("cliente").value || 'Não informado'}\n` +
+    `Parceiro: ${document.getElementById("parceiro").value || 'Não informado'}\n` +
+    `Nome do Técnico: ${document.getElementById("nomeTecnico").value || 'Não informado'}\n` +
+    `Telefone do Técnico: ${document.getElementById("telefoneTecnico").value || 'Não informado'}\n` +
+    `Quantidade de patrimônios: ${document.getElementById("quantidadePatrimonios").value || 'Não informado'}\n` +
+    `Problema identificado: ${document.getElementById("problemaIdentificado").value || 'Não informado'}\n` +
+    `Nº Patrimônio/serial: ${document.getElementById("numeroPatrimonio").value || 'Não informado'}\n` +
+    `Modelo do equipamento: ${document.getElementById("modeloEquipamento").value || 'Não informado'}\n` +
+    `Nome de quem acompanhou: ${document.getElementById("nomeAcompanhante").value || 'Não informado'}\n` +
+    `KM inicial: ${document.getElementById("kmInicial").value || 'Não informado'}\n` +
+    `KM final: ${document.getElementById("kmFinal").value || 'Não informado'}\n` +
+    `KM total percorrido: ${document.getElementById("kmTotal").value || 'Não informado'}\n` +
+    `Horário de chegada: ${document.getElementById("horaChegada").value || 'Não informado'}\n` +
+    `Horário de saída: ${document.getElementById("horaSaida").value || 'Não informado'}\n` +
+    `Tempo total de atendimento: ${document.getElementById("tempoTotal").value || 'Não informado'}\n` +
+    `Endereço de partida: ${document.getElementById("enderecoPartida").value || 'Não informado'}\n` +
+    `Endereço de chegada: ${document.getElementById("enderecoChegada").value || 'Não informado'}\n` +
+    `Descrição: ${document.getElementById("descricaoChamado").value || 'Sem descrição'}\n` +
+    `Informante: ${document.getElementById("nomeInformante").value || 'Não informado'}\n` +
+    `Status: ${document.getElementById("statusChamado").value || 'Não informado'}`;
   
   const textoEncoded = encodeURIComponent(textoWhatsApp);
   const whatsappUrl = `https://api.whatsapp.com/send?text=${textoEncoded}`;
@@ -1075,7 +1027,7 @@ async function enviarRelatorioCombinado() {
     }
     
     // Mostrar indicador de carregamento
-    const btn = document.querySelector('button[onclick="enviarRelatorioCombinado()"]');
+    const btn = document.querySelector('button.enviar-relatorio-btn');
     const btnText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
@@ -1086,6 +1038,9 @@ async function enviarRelatorioCombinado() {
 
     // Enviar para o Discord
     await sendToDiscord(textoRelatorio);
+    
+    // Salvar relatório no histórico
+    salvarRelatorioNoHistorico();
 
     // Enviar para o WhatsApp
     enviarWhatsApp();
@@ -1099,9 +1054,176 @@ async function enviarRelatorioCombinado() {
     showErrorModal(`${err.message}`);
     
     // Restaurar botão em caso de erro
-    const btn = document.querySelector('button[onclick="enviarRelatorioCombinado()"]');
+    const btn = document.querySelector('button.enviar-relatorio-btn');
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-send-check-fill me-2"></i> Enviar e Copiar Relatório';
+  }
+}
+
+// Função para salvar relatório no histórico
+function salvarRelatorioNoHistorico() {
+  try {
+    // Obter os dados atuais
+    const relatorio = {
+      id: Date.now(), // Usar timestamp como ID único
+      data: document.getElementById("dataChamado").value || 'Não informado',
+      numeroChamado: document.getElementById("numeroChamado").value || 'Não informado',
+      tipoChamado: document.getElementById("tipoChamado").value || 'Não informado',
+      cliente: document.getElementById("cliente").value || 'Não informado',
+      parceiro: document.getElementById("parceiro").value || 'Não informado',
+      nomeTecnico: document.getElementById("nomeTecnico").value || 'Não informado',
+      telefoneTecnico: document.getElementById("telefoneTecnico").value || 'Não informado',
+      quantidadePatrimonios: document.getElementById("quantidadePatrimonios").value || 'Não informado',
+      problemaIdentificado: document.getElementById("problemaIdentificado").value || 'Não informado',
+      numeroPatrimonio: document.getElementById("numeroPatrimonio").value || 'Não informado',
+      modeloEquipamento: document.getElementById("modeloEquipamento").value || 'Não informado',
+      nomeAcompanhante: document.getElementById("nomeAcompanhante").value || 'Não informado',
+      kmInicial: document.getElementById("kmInicial").value || 'Não informado',
+      kmFinal: document.getElementById("kmFinal").value || 'Não informado',
+      kmTotal: document.getElementById("kmTotal").value || 'Não informado',
+      horaChegada: document.getElementById("horaChegada").value || 'Não informado',
+      horaSaida: document.getElementById("horaSaida").value || 'Não informado',
+      tempoTotal: document.getElementById("tempoTotal").value || 'Não informado',
+      enderecoPartida: document.getElementById("enderecoPartida").value || 'Não informado',
+      enderecoChegada: document.getElementById("enderecoChegada").value || 'Não informado',
+      descricaoChamado: document.getElementById("descricaoChamado").value || 'Sem descrição',
+      nomeInformante: document.getElementById("nomeInformante").value || 'Não informado',
+      statusChamado: document.getElementById("statusChamado").value || 'Não informado',
+      dataCriacao: new Date().toISOString()
+    };
+    
+    // Obter histórico existente ou criar um novo array
+    let historico = JSON.parse(localStorage.getItem("historicoRelatorios") || "[]");
+    
+    // Adicionar novo relatório ao início do array
+    historico.unshift(relatorio);
+    
+    // Limitar a quantidade de relatórios salvos (opcional, para não sobrecarregar o localStorage)
+    if (historico.length > 50) {
+      historico = historico.slice(0, 50);
+    }
+    
+    // Salvar no localStorage
+    localStorage.setItem("historicoRelatorios", JSON.stringify(historico));
+    
+  } catch (error) {
+    console.error("Erro ao salvar relatório no histórico:", error);
+  }
+}
+
+// Função para obter histórico de relatórios
+function obterHistoricoRelatorios() {
+  try {
+    return JSON.parse(localStorage.getItem("historicoRelatorios") || "[]");
+  } catch (error) {
+    console.error("Erro ao obter histórico de relatórios:", error);
+    return [];
+  }
+}
+
+// Função para gerar texto formatado de um relatório do histórico
+function gerarTextoRelatorio(relatorio) {
+  const textoRelatorio = 
+    `Relatório de Chamado\n\n` +
+    `Data do chamado: ${relatorio.data}\n` +
+    `Nº do chamado: ${relatorio.numeroChamado}\n` +
+    `Tipo de chamado: ${relatorio.tipoChamado}\n` +
+    `Cliente: ${relatorio.cliente}\n` +
+    `Parceiro: ${relatorio.parceiro}\n` +
+    `Nome do Técnico: ${relatorio.nomeTecnico}\n` +
+    `Telefone do Técnico: ${relatorio.telefoneTecnico}\n` +
+    `Quantidade de patrimônios: ${relatorio.quantidadePatrimonios}\n` +
+    `Problema identificado: ${relatorio.problemaIdentificado}\n` +
+    `Nº Patrimônio/serial: ${relatorio.numeroPatrimonio}\n` +
+    `Modelo do equipamento: ${relatorio.modeloEquipamento}\n` +
+    `Nome de quem acompanhou: ${relatorio.nomeAcompanhante}\n` +
+    `KM inicial: ${relatorio.kmInicial}\n` +
+    `KM final: ${relatorio.kmFinal}\n` +
+    `KM total percorrido: ${relatorio.kmTotal}\n` +
+    `Horário de chegada: ${relatorio.horaChegada}\n` +
+    `Horário de saída: ${relatorio.horaSaida}\n` +
+    `Tempo total de atendimento: ${relatorio.tempoTotal}\n` +
+    `Endereço de partida: ${relatorio.enderecoPartida}\n` +
+    `Endereço de chegada: ${relatorio.enderecoChegada}\n` +
+    `Descrição: ${relatorio.descricaoChamado}\n` +
+    `Informante: ${relatorio.nomeInformante}\n` +
+    `Status: ${relatorio.statusChamado}`;
+    
+  return textoRelatorio;
+}
+
+// Função para copiar um relatório do histórico
+function copiarRelatorioHistorico(relatorioId) {
+  try {
+    // Obter histórico
+    const historico = obterHistoricoRelatorios();
+    
+    // Encontrar o relatório pelo ID
+    const relatorio = historico.find(r => r.id === relatorioId);
+    
+    if (!relatorio) {
+      throw new Error("Relatório não encontrado");
+    }
+    
+    // Gerar texto formatado
+    const textoRelatorio = gerarTextoRelatorio(relatorio);
+    
+    // Criar um elemento de texto temporário
+    const elementoTemp = document.createElement('textarea');
+    elementoTemp.value = textoRelatorio;
+    document.body.appendChild(elementoTemp);
+    
+    // Selecionar e copiar o texto
+    elementoTemp.select();
+    document.execCommand('copy');
+    
+    // Remover o elemento temporário
+    document.body.removeChild(elementoTemp);
+    
+    // Mostrar feedback
+    mostrarToast("Relatório copiado para a área de transferência!", "success");
+    
+    return textoRelatorio;
+  } catch (error) {
+    mostrarToast("Erro ao copiar relatório: " + error.message, "error");
+    console.error("Erro ao copiar relatório do histórico:", error);
+  }
+}
+
+// Função para excluir um relatório do histórico
+function excluirRelatorio(relatorioId) {
+  try {
+    // Obter histórico
+    let historico = obterHistoricoRelatorios();
+    
+    // Filtrar para remover o relatório selecionado
+    historico = historico.filter(r => r.id !== relatorioId);
+    
+    // Salvar o histórico atualizado
+    localStorage.setItem("historicoRelatorios", JSON.stringify(historico));
+    
+    // Mostrar feedback
+    mostrarToast("Relatório excluído com sucesso", "success");
+    
+    // Retornar true para indicar sucesso
+    return true;
+  } catch (error) {
+    mostrarToast("Erro ao excluir relatório: " + error.message, "error");
+    console.error("Erro ao excluir relatório:", error);
+    return false;
+  }
+}
+
+// Função para limpar todo o histórico
+function limparHistoricoRelatorios() {
+  try {
+    localStorage.removeItem("historicoRelatorios");
+    mostrarToast("Histórico de relatórios limpo com sucesso", "success");
+    return true;
+  } catch (error) {
+    mostrarToast("Erro ao limpar histórico: " + error.message, "error");
+    console.error("Erro ao limpar histórico:", error);
+    return false;
   }
 }
 
@@ -1116,5 +1238,38 @@ window.onload = function() {
   // Inicializar cálculos e barra de progresso
   calcularKmTotal();
   calcularTempoAtendimento();
-  atualizarBarraProgresso();
+  
+  // Garantir que todos os campos preenchidos são marcados como válidos
+  setTimeout(() => {
+    atualizarBarraProgresso();
+  }, 100);
+
+  // Adicionar event listeners para botões
+  document.querySelector('button.delete-resp-btn')?.addEventListener('click', deleteRespGeral);
+  document.querySelector('button.enviar-relatorio-btn')?.addEventListener('click', enviarRelatorioCombinado);
+  
+  // Configurar salvamento automático ao digitar ou alterar qualquer campo
+  const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
+  formInputs.forEach(input => {
+    ['input', 'change'].forEach(eventType => {
+      input.addEventListener(eventType, () => {
+        // Salvar os dados em qualquer alteração
+        salvarDadosFormulario();
+        
+        // Atualizar cálculos conforme necessário
+        if (['kmInicial', 'kmFinal'].includes(input.id)) {
+          calcularKmTotal();
+        }
+        
+        if (['horaChegada', 'horaSaida'].includes(input.id)) {
+          calcularTempoAtendimento();
+        }
+        
+        // Sempre atualiza a barra de progresso
+        atualizarBarraProgresso();
+      });
+    });
+  });
 };
+
+

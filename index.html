@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>Gerador de Script</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  <meta content="Gerador de relatórios técnicos para chamados de atendimento em campo" name="description">
+  <meta content="relatório técnico, chamados, atendimento em campo, suporte técnico, gerador de script" name="keywords">
+  <meta name="author" content="Patrick C Cruz">
 
-  <!-- Meta tags de segurança -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://nominatim.openstreetmap.org https://discord.com https://api.whatsapp.com; img-src 'self' https://raw.githubusercontent.com data:;">
+  <!-- Meta tags de segurança - A tag CSP será substituída pelo script meta-csp.js -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
   <meta name="referrer" content="no-referrer-when-downgrade">
 
+  <!-- Script de configuração CSP (deve ser carregado primeiro) -->
+  <script src="assets/js/meta-csp.js"></script>
+
   <!-- Favicons -->
-  <link href="assets/img/Icon geral.png" rel="icon">
-  <link href="assets/img/Icon geral.png" rel="apple-touch-icon">
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/favicon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -36,85 +38,6 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
-  <style>
-    :focus {
-      border-color: #1bd81b !important; /* Use !important para sobrescrever */
-      box-shadow: 0 0 5px rgb(7, 228, 25) !important;
-      outline: none !important;
-    }
-    
-    .card-header {
-      background-color: #f8f9fa;
-      border-bottom: 1px solid rgba(0,0,0,.125);
-      padding: 0.75rem 1.25rem;
-    }
-    
-    .progress-bar {
-      transition: width 0.3s ease;
-    }
-    
-    .float-alert {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1050;
-    }
-    
-    .copy-btn {
-      cursor: pointer;
-    }
-    
-    .readonly-info {
-      background-color: #f8f9fa;
-    }
-
-    .pac-container {
-      z-index: 1060 !important;
-    }
-
-    .btn-action {
-      font-weight: 600;
-      padding: 10px 20px;
-      transition: all 0.3s;
-    }
-
-    .btn-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    /* Estilos para autocomplete Nominatim */
-    .sugestoes-endereco {
-      position: absolute;
-      background: white;
-      width: 100%;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      border: 1px solid #ced4da;
-      border-radius: 0 0 0.25rem 0.25rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      display: none;
-    }
-
-    .sugestao-item {
-      padding: 10px 15px;
-      cursor: pointer;
-      border-bottom: 1px solid #f1f1f1;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .sugestao-item:hover {
-      background-color: #f8f9fa;
-    }
-
-    .form-floating {
-      position: relative;
-    }
-  </style>
 </head>
 
 <body>
@@ -124,18 +47,12 @@
 
     <div class="d-flex align-items-center justify-content-between">
       <a href="index.html" class="logo d-flex align-items-center">
-        <img src="assets/img/Icon geral.png" alt="">
+        <img src="assets/img/logo.png" alt="">
         <span class="d-none d-lg-block">Script</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
     
-    <!-- Barra de progresso -->
-    <div class="ms-auto me-3 d-none d-md-block" style="width: 30%;">
-      <div class="progress" style="height: 10px;">
-        <div class="progress-bar bg-success" id="formProgress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-    </div>
   </header><!-- End Header -->
 
 
@@ -145,11 +62,18 @@
     <ul class="sidebar-nav" id="sidebar-nav">
 
       <li class="nav-item">
-        <a class="nav-link " href="index.html">
+        <a class="nav-link active" href="index.html">
           <i class="bi bi-grid"></i>
           <span>Gerador Script</span>
         </a>
-      </li><!-- End Dashboard Nav -->
+      </li>
+      
+      <li class="nav-item">
+        <a class="nav-link" href="relatorios.html">
+          <i class="bi bi-clock-history"></i>
+          <span>Histórico de Relatórios</span>
+        </a>
+      </li>
     </ul>
   </aside><!-- End Sidebar-->
 
@@ -157,13 +81,11 @@
     <section class="section">
       <div class="row">
         <div class="col-lg-12">
-          <!-- Progress bar móvel -->
+          <!-- Informação sobre campos obrigatórios (versão mobile) -->
           <div class="d-md-none mb-3">
-            <div class="progress" style="height: 10px;">
-              <div class="progress-bar bg-success" id="formProgressMobile" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-            <div class="text-center mt-1">
-              <small id="progressText">0% Preenchido</small>
+            <div class="info-helper d-flex align-items-center mt-2 mb-3">
+              <span class="info-icon me-2"><i class="bi bi-info-circle text-primary"></i></span>
+              <small class="text-muted">Os campos marcados com <span class="text-danger fw-bold">*</span> são obrigatórios.</small>
             </div>
           </div>
           
@@ -177,19 +99,19 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-floating mb-3">
-                      <input type="date" class="form-control" id="dataChamado" oninput="infoGeral()">
+                      <input type="date" class="form-control" id="dataChamado">
                       <label for="dataChamado">Data do chamado:</label>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-floating mb-3">
-                      <input type="number" class="form-control" id="numeroChamado" oninput="infoGeral()">
+                      <input type="number" class="form-control" id="numeroChamado">
                       <label for="numeroChamado">Nº do chamado:</label>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-floating mb-3">
-                      <select class="form-select" id="tipoChamado" oninput="infoGeral()">
+                      <select class="form-select" id="tipoChamado">
                         <option value="">Selecione o tipo</option>
                         <option value="implantação">Implantação</option>
                         <option value="sustentação">Sustentação</option>
@@ -201,13 +123,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="cliente" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="cliente">
                       <label for="cliente">Cliente:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="parceiro" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="parceiro">
                       <label for="parceiro">Parceiro:</label>
                     </div>
                   </div>
@@ -215,13 +137,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="nomeTecnico" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="nomeTecnico">
                       <label for="nomeTecnico">Nome do Técnico:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="nomeInformante" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="nomeInformante">
                       <label for="nomeInformante">Nome de quem informou o chamado:</label>
                     </div>
                   </div>
@@ -229,7 +151,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="tel" class="form-control" id="telefoneTecnico" oninput="infoGeral()">
+                      <input type="tel" class="form-control" id="telefoneTecnico">
                       <label for="telefoneTecnico">Telefone de contato do Técnico:</label>
                     </div>
                   </div>
@@ -246,13 +168,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="number" class="form-control" id="quantidadePatrimonios" oninput="infoGeral()">
+                      <input type="number" class="form-control" id="quantidadePatrimonios">
                       <label for="quantidadePatrimonios">Quantidade de patrimônios tratados:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <select class="form-select" id="statusChamado" oninput="infoGeral()">
+                      <select class="form-select" id="statusChamado">
                         <option value="">Selecione o status</option>
                         <option value="resolvido">Resolvido</option>
                         <option value="pendente">Pendente</option>
@@ -265,13 +187,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="problemaIdentificado" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="problemaIdentificado">
                       <label for="problemaIdentificado">Problema identificado:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="numeroPatrimonio" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="numeroPatrimonio">
                       <label for="numeroPatrimonio">N.º Patrimônio/serial:</label>
                     </div>
                   </div>
@@ -279,19 +201,19 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="modeloEquipamento" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="modeloEquipamento">
                       <label for="modeloEquipamento">Modelo do equipamento:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="nomeAcompanhante" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="nomeAcompanhante">
                       <label for="nomeAcompanhante">Nome de quem acompanhou a atividade:</label>
                     </div>
                   </div>
                 </div>
                 <div class="form-floating mb-3">
-                  <textarea class="form-control" id="descricaoChamado" style="height: 120px" oninput="infoGeral()"></textarea>
+                  <textarea class="form-control" id="descricaoChamado"></textarea>
                   <label for="descricaoChamado">Atividade Realizada:</label>
                 </div>
               </div>
@@ -306,13 +228,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="number" class="form-control" id="kmInicial" oninput="calcularKmTotal(); infoGeral()">
+                      <input type="number" class="form-control" id="kmInicial">
                       <label for="kmInicial">KM inicial:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="number" class="form-control" id="kmFinal" oninput="calcularKmTotal(); infoGeral()">
+                      <input type="number" class="form-control" id="kmFinal">
                       <label for="kmFinal">KM final:</label>
                     </div>
                   </div>
@@ -324,13 +246,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="enderecoPartida" placeholder="Digite o endereço de partida" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="enderecoPartida" placeholder="Digite o endereço de partida">
                       <label for="enderecoPartida">Endereço de partida:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="text" class="form-control" id="enderecoChegada" placeholder="Digite o endereço de chegada" oninput="infoGeral()">
+                      <input type="text" class="form-control" id="enderecoChegada" placeholder="Digite o endereço de chegada">
                       <label for="enderecoChegada">Endereço de chegada:</label>
                     </div>
                   </div>
@@ -347,13 +269,13 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="time" class="form-control" id="horaChegada" oninput="calcularTempoAtendimento(); infoGeral()">
+                      <input type="time" class="form-control" id="horaChegada">
                       <label for="horaChegada">Início da Atividade:</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-floating mb-3">
-                      <input type="time" class="form-control" id="horaSaida" oninput="calcularTempoAtendimento(); infoGeral()">
+                      <input type="time" class="form-control" id="horaSaida">
                       <label for="horaSaida">Término da Atividade:</label>
                     </div>
                   </div>
@@ -367,11 +289,11 @@
 
             <!-- Ações -->
             <div class="text-center mb-4">
-              <button type="button" class="btn btn-primary btn-lg btn-action" onclick="enviarRelatorioCombinado()">
+              <button type="button" class="btn btn-primary btn-lg btn-action enviar-relatorio-btn">
                 <i class="bi bi-send-check-fill me-2"></i> Enviar e Copiar Relatório
               </button>
-              <button type="button" class="btn btn-outline-danger btn-action ms-3" onclick="deleteRespGeral()">
-                <i class="bi bi-trash"></i> Apagar Tudo
+              <button type="button" class="btn btn-outline-danger btn-action ms-3 delete-resp-btn">
+                <i class="bi bi-trash"></i> Apagar Dados
               </button>
             </div>
           </form>
@@ -384,7 +306,7 @@
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
-      &copy; Copyright <strong><span>Patrick C Cruz</span></strong>. Todos os direitos Reservado
+      &copy; Copyright <strong><span>Patrick C Cruz</span></strong>. Todos os direitos Reservados
     </div>
     <div class="credits">
       Feito pelo <a href="https://www.linkedin.com/in/patrick-da-costa-cruz-08493212a/" target="_blank">Patrick C
@@ -394,6 +316,31 @@
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
       class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Modal de Configuração do Webhook -->
+  <div class="modal fade" id="webhookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-gear"></i> Configuração do Discord Webhook
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Insira a URL do webhook do Discord para enviar relatórios:</p>
+          <input type="text" class="form-control" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/...">
+          <small class="text-muted mt-2 d-block">
+            Para criar um webhook no Discord, vá para Configurações do Servidor > Integrações > Webhooks > Novo Webhook
+          </small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveWebhookBtn">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Vendor JS Files -->
   <script src="script.js"></script>
@@ -452,6 +399,67 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Adicionando event listeners via JavaScript em vez de atributos inline
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificação de recursos carregados
+      const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+      cssLinks.forEach(link => {
+        if (!link.sheet) {
+          console.warn('CSS não carregado:', link.href);
+        }
+      });
+      
+      // Inputs que chamam infoGeral()
+      const infoGeralInputs = [
+        'dataChamado', 'numeroChamado', 'tipoChamado', 'cliente', 'parceiro',
+        'nomeTecnico', 'nomeInformante', 'telefoneTecnico', 'quantidadePatrimonios',
+        'statusChamado', 'problemaIdentificado', 'numeroPatrimonio', 'modeloEquipamento',
+        'nomeAcompanhante', 'descricaoChamado', 'enderecoPartida', 'enderecoChegada'
+      ];
+      
+      infoGeralInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', infoGeral);
+        }
+      });
+      
+      // Campos KM que chamam calcularKmTotal e infoGeral
+      ['kmInicial', 'kmFinal'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', function() {
+            calcularKmTotal();
+            infoGeral();
+          });
+        }
+      });
+      
+      // Campos horário que chamam calcularTempoAtendimento e infoGeral
+      ['horaChegada', 'horaSaida'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', function() {
+            calcularTempoAtendimento();
+            infoGeral();
+          });
+        }
+      });
+      
+      // Botões de ação
+      const btnEnviar = document.querySelector('.btn-primary');
+      if (btnEnviar) {
+        btnEnviar.addEventListener('click', enviarRelatorioCombinado);
+      }
+      
+      const btnApagar = document.querySelector('.btn-outline-danger');
+      if (btnApagar) {
+        btnApagar.addEventListener('click', deleteRespGeral);
+      }
+    });
+  </script>
 
 </body>
 
