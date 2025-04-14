@@ -99,7 +99,7 @@
                 <div class="row">
                   <div class="col-md-4">
                     <div class="form-floating mb-3">
-                      <input type="date" class="form-control" id="dataChamado">
+                      <input type="date" class="form-control" id="dataChamado" autocomplete="on" data-preserve="true">
                       <label for="dataChamado">Data do chamado:</label>
                     </div>
                   </div>
@@ -426,6 +426,18 @@
         }
       });
       
+      // Tratamento especial para o campo de data
+      const campoData = document.getElementById('dataChamado');
+      if (campoData) {
+        // Garantir que a data seja salva imediatamente quando alterada
+        campoData.addEventListener('change', function() {
+          const formData = JSON.parse(localStorage.getItem("formData")) || {};
+          formData['dataChamado'] = this.value;
+          localStorage.setItem("formData", JSON.stringify(formData));
+          this.setAttribute('value', this.value);
+        });
+      }
+      
       // Campos KM que chamam calcularKmTotal e infoGeral
       ['kmInicial', 'kmFinal'].forEach(id => {
         const element = document.getElementById(id);
@@ -458,6 +470,9 @@
       if (btnApagar) {
         btnApagar.addEventListener('click', deleteRespGeral);
       }
+      
+      // Carregar dados do formulário (se houver)
+      carregarDadosFormulario();
     });
   </script>
 

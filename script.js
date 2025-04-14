@@ -600,9 +600,16 @@ function definirDataAtual() {
     
     if (campoData) {
       campoData.value = dataFormatada;
+      campoData.setAttribute('value', dataFormatada); // Define o atributo value também
+      campoData.classList.add('is-valid'); // Marca o campo como válido
+      
+      // Salvar no localStorage imediatamente para garantir persistência
+      const dadosAtuais = JSON.parse(localStorage.getItem("formData")) || {};
+      dadosAtuais['dataChamado'] = dataFormatada;
+      localStorage.setItem("formData", JSON.stringify(dadosAtuais));
       
       // Atualizar barra de progresso e informações
-      infoGeral();
+      atualizarBarraProgresso(); // Chama apenas atualizarBarraProgresso para evitar loop recursivo
     }
   } catch (error) {
     // Silencia o erro para o usuário em produção
@@ -835,13 +842,17 @@ function salvarDadosFormulario() {
 function carregarDadosFormulario() {
   const formData = JSON.parse(localStorage.getItem("formData"));
   
+  // Sempre definir a data atual primeiro, independentemente dos dados salvos
+  definirDataAtual();
+  
   if (formData) {
     // Identificar todos os inputs, selects e textareas
     const formInputs = document.querySelectorAll('#scriptForm input, #scriptForm select, #scriptForm textarea');
     
     // Preencher cada campo com os dados salvos
     formInputs.forEach(input => {
-      if (input.id && formData[input.id]) {
+      // Ignorar o campo de data, pois queremos sempre mostrar a data atual
+      if (input.id && formData[input.id] && input.id !== 'dataChamado') {
         input.value = formData[input.id];
         
         // Marcar como válido se não for readonly
@@ -855,9 +866,6 @@ function carregarDadosFormulario() {
     calcularKmTotal();
     calcularTempoAtendimento();
     atualizarBarraProgresso();
-  } else {
-    // Se não houver dados salvos, definir a data atual
-    definirDataAtual();
   }
 }
 
@@ -1004,6 +1012,9 @@ function enviarWhatsApp() {
 // Função combinada para enviar, copiar e compartilhar o relatório
 async function enviarRelatorioCombinado() {
   try {
+    // Certificar-se de que estamos usando a data atual
+    definirDataAtual();
+    
     // Verificar campos obrigatórios
     const camposObrigatorios = [
       { id: "dataChamado", nome: "Data do chamado" },
@@ -1229,10 +1240,13 @@ function limparHistoricoRelatorios() {
 
 // Inicializações e eventos
 window.onload = function() {
+  // Definir a data atual primeiro
+  definirDataAtual();
+  
   // Inicializar o autocomplete para os campos de endereço
   initAutocomplete();
   
-  // Carregar dados salvos ou definir data atual
+  // Carregar dados salvos
   carregarDadosFormulario();
   
   // Inicializar cálculos e barra de progresso
