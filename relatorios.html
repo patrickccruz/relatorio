@@ -262,6 +262,18 @@
         relatoriosFiltrados = [...todosRelatorios];
       } else {
         relatoriosFiltrados = todosRelatorios.filter(relatorio => {
+          // Verificar pela data de criação formatada
+          const dataCriacao = new Date(relatorio.dataCriacao);
+          const dataFormatada = dataCriacao.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+          });
+          
+          if (dataFormatada.toLowerCase().includes(query)) {
+            return true;
+          }
+          
           // Verificar todos os campos de texto do relatório
           return Object.keys(relatorio).some(chave => {
             // Verificar se o valor é uma string e contém a consulta
