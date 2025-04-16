@@ -262,13 +262,14 @@
         relatoriosFiltrados = [...todosRelatorios];
       } else {
         relatoriosFiltrados = todosRelatorios.filter(relatorio => {
-          return (
-            relatorio.cliente.toLowerCase().includes(query) ||
-            relatorio.numeroChamado.toLowerCase().includes(query) ||
-            relatorio.tipoChamado.toLowerCase().includes(query) ||
-            relatorio.problemaIdentificado.toLowerCase().includes(query) ||
-            relatorio.statusChamado.toLowerCase().includes(query)
-          );
+          // Verificar todos os campos de texto do relatório
+          return Object.keys(relatorio).some(chave => {
+            // Verificar se o valor é uma string e contém a consulta
+            if (typeof relatorio[chave] === 'string') {
+              return relatorio[chave].toLowerCase().includes(query);
+            }
+            return false;
+          });
         });
       }
       
